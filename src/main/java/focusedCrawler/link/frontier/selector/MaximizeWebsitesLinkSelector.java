@@ -24,14 +24,17 @@ public class MaximizeWebsitesLinkSelector implements LinkSelector {
     int maxLinksPerDomain = 5;
     
     @Override
-    public LinkRelevance[] select(Frontier frontier, int numberOfLinks) {
+    public LinkRelevance[] select(Frontier frontier, int type, int numberOfLinks) {
         
         PersistentHashtable<LinkRelevance> urlRelevance = frontier.getUrlRelevanceHashtable();
+
+        List<Tuple<LinkRelevance>> tuples = urlRelevance.getTable();
+        
         Map<String, MinMaxPriorityQueue<LinkRelevance>> topkLinksPerDomain = new HashMap<>();
         
-        for(Tuple<LinkRelevance> tuple : urlRelevance.getTable()) {
-            double relevance = tuple.getValue().getRelevance();
-            if(relevance > 0) {
+        for(Tuple<LinkRelevance> tuple : tuples) {
+            Double relevance = tuple.getValue().getRelevance(type);
+            if(relevance != null && relevance > 0) {
                 LinkRelevance linkRelevance = tuple.getValue();
                 
                 String domainName = linkRelevance.getTopLevelDomainName();

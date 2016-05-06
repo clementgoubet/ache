@@ -14,7 +14,7 @@ import focusedCrawler.util.persistence.Tuple;
 public class RandomLinkSelector implements LinkSelector {
     
     @Override
-    public LinkRelevance[] select(Frontier frontier, int numberOfLinks) {
+    public LinkRelevance[] select(Frontier frontier, int type, int numberOfLinks) {
         
         PersistentHashtable<LinkRelevance> urlRelevance = frontier.getUrlRelevanceHashtable();
         List<Tuple<LinkRelevance>> tuples = urlRelevance.getTable();
@@ -22,7 +22,8 @@ public class RandomLinkSelector implements LinkSelector {
         List<LinkRelevance> tempList = new ArrayList<LinkRelevance>();
         for (int i = 0; tempList.size() < numberOfLinks && i < tuples.size(); i++) {
             LinkRelevance linkRelevance = tuples.get(i).getValue();
-            if (linkRelevance.getRelevance() > 0) {
+            Double relevance = linkRelevance.getRelevance(type);
+            if (relevance != null && relevance > 0) {
                 tempList.add(linkRelevance);
             }
         }

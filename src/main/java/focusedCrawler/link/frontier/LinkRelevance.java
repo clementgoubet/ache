@@ -30,6 +30,8 @@ import java.net.URL;
 import java.util.Comparator;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -39,11 +41,17 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.net.InternetDomainName;
 
 @SuppressWarnings("serial")
+@JsonInclude(Include.NON_NULL)
 public class LinkRelevance implements Serializable {
 
     public static double DEFAULT_RELEVANCE = 299;
     public static double DEFAULT_HUB_RELEVANCE = 100;
     public static double DEFAULT_AUTH_RELEVANCE = 200;
+	
+	public static int TYPE_FORWARD = 1;
+	public static int TYPE_BACKLINK_BACKWARD = 2;
+	public static int TYPE_BACKLINK_FORWARD = 3;
+	public static int DEFAULT_TYPE = TYPE_FORWARD;
     
     public static Comparator<LinkRelevance> DESC_ORDER_COMPARATOR = new Comparator<LinkRelevance>() {
         @Override
@@ -55,20 +63,48 @@ public class LinkRelevance implements Serializable {
     @JsonDeserialize(using = UrlDeseralizer.class)
     private URL url;
     private double relevance;
+    private int type;
     
+    /*
+	 * type is mapped as follows:
+	 * 		1 --> select forward relevance of links in queue 1 (normal crawl forward)
+	 * 		2 --> select backward relevance of links in queue 1 (select which url to backlink)
+	 * 		3 --> select forward relevance of links in queue 2 (forward crawl of backlinks)
+	 */
     public LinkRelevance() {
-        // required for JSON serialization
+		// required for JSON serialization
     }
-
+    
+    public LinkRelevance(String url, double relevance) throws MalformedURLException {
+    	this(new URL(url), relevance);
+    }
+    
     public LinkRelevance(URL url, double relevance) {
+    	this(url, DEFAULT_TYPE, relevance);
+    }
+    
+    public LinkRelevance(URL url, int type, double relevance) {
         this.url = url;
+        this.type=type;
         this.relevance = relevance;
     }
 
-    public LinkRelevance(String string, double relevance) throws MalformedURLException {
-        this(new URL(string), relevance);
+    public LinkRelevance(String string, int type, double relevance) throws MalformedURLException {
+        this(new URL(string), type, relevance);
     }
 
+    public void setURL(URL url){
+    	this.url = url;
+    }
+    
+    public void setRelevance(double relevance){
+    	this.relevance = relevance;
+    }
+    
+    public void setType(int type){
+    	this.type = type;
+    }
+    
     public URL getURL() {
         return url;
     }
@@ -78,6 +114,19 @@ public class LinkRelevance implements Serializable {
     }
     
     @JsonIgnore
+    public Double getRelevance(int requestedType) {
+    	if(type == requestedType){
+    		return relevance;
+    	}
+    	else
+    		return null;
+    }
+    
+    public int getType(){
+    	return type;
+    }
+    
+	@JsonIgnore
     public InternetDomainName getDomainName() {
         String host = url.getHost();
         InternetDomainName domain = InternetDomainName.from(host);
@@ -103,21 +152,21 @@ public class LinkRelevance implements Serializable {
         }
     }
     
-    public static LinkRelevance create(String url) throws MalformedURLException {
-        return new LinkRelevance(new URL(url), LinkRelevance.DEFAULT_RELEVANCE);
-    }
-    
+	public static LinkRelevance create(String url) throws MalformedURLException {
+		return new LinkRelevance(new URL(url), DEFAULT_TYPE, LinkRelevance.DEFAULT_RELEVANCE);
+	}
+	
     @Override
     public String toString() {
-        return "LinkRelevance[url=" + url + ", relevance=" + relevance + "]";
+        return "LinkRelevance[url=" + url + ",type=" + type + ", relevance=" + (int)relevance + "]";
     }
 
-    public static class UrlDeseralizer extends JsonDeserializer<URL> {
-        @Override
-        public URL deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-            JsonNode node = parser.getCodec().readTree(parser);
-            return new URL(node.asText());
-        }
-    }
+	public static class UrlDeseralizer extends JsonDeserializer<URL> {
+		@Override
+		public URL deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+			JsonNode node = parser.getCodec().readTree(parser);
+			return new URL(node.asText());
+		}
+	}
 
 }

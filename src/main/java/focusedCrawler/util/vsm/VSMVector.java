@@ -292,7 +292,7 @@ public class VSMVector {
         	  double freq = elem.getWeight();
         	  Integer df = idfs.get(term);
         	  if(df == null){
-        		  elem.setWeight(0);
+        		  elem.setWeight(0d);
         	  }else{
         		  double weight = freq  / df.doubleValue();
         		  elem.setWeight(weight);
@@ -521,9 +521,9 @@ public class VSMVector {
             String word = elem.getWord();
             Integer ocur = (Integer)idfs.get(word);
             if( ocur == null){
-                idfs.put(word,new Integer((int)elem.getWeight()));
+                idfs.put(word,new Integer(elem.getWeight().intValue()));
             }else{
-                idfs.put(word,new Integer(ocur.intValue()+(int)elem.getWeight()));
+                idfs.put(word,new Integer(ocur.intValue()+elem.getWeight().intValue()));
             }
         }
       }

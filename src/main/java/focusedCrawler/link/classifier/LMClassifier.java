@@ -10,20 +10,20 @@ import java.util.Map;
 
 import weka.classifiers.Classifier;
 import weka.core.Instances;
+import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.link.classifier.builder.Instance;
 import focusedCrawler.link.classifier.builder.LinkNeighborhoodWrapper;
 import focusedCrawler.util.ParameterFile;
-import focusedCrawler.util.parser.LinkNeighborhood;
 import focusedCrawler.util.string.StopList;
 
-public class LNClassifier {
+public class LMClassifier {
 
 	private Classifier classifier;
 	private Instances instances;
 	private LinkNeighborhoodWrapper wrapper;
 	private String[] attributes;
 
-	public LNClassifier(Classifier classifier, Instances instances,
+	public LMClassifier(Classifier classifier, Instances instances,
 	                    LinkNeighborhoodWrapper wrapper, String[] attributes) {
 		this.classifier = classifier;
 		this.instances = instances;
@@ -31,8 +31,8 @@ public class LNClassifier {
 		this.attributes = attributes;
 	}
 	
-	public double[] classify(LinkNeighborhood ln) throws Exception {
-		Map<String, Instance> urlWords = wrapper.extractLinksFull(ln, attributes);
+	public double[] classify(LinkMetadata lm) throws Exception {
+		Map<String, Instance> urlWords = wrapper.extractLinksFull(lm, attributes);
 		Iterator<String> iter = urlWords.keySet().iterator();
 		String url = iter.next();
 		Instance instance = (Instance)urlWords.get(url);
@@ -43,7 +43,7 @@ public class LNClassifier {
 		return probs;
 	}
 	
-	public static LNClassifier create(String featureFilePath,
+	public static LMClassifier create(String featureFilePath,
 	                                  String modelFilePath,
 	                                  StopList stoplist)
                                       throws ClassNotFoundException,
@@ -54,7 +54,7 @@ public class LNClassifier {
 	    return create(attributes, classValues, modelFilePath, stoplist);
 	}
 	
-	public static LNClassifier create(String[] attributes, String[] classValues,
+	public static LMClassifier create(String[] attributes, String[] classValues,
 	                                  String modelFilePath, StopList stoplist)
                                       throws ClassNotFoundException,
                                              IOException {
@@ -75,7 +75,7 @@ public class LNClassifier {
 	    
 	    Classifier classifier = loadClassifier(modelFilePath);
 	    
-	    return new LNClassifier(classifier, insts, wrapper, attributes);
+	    return new LMClassifier(classifier, insts, wrapper, attributes);
 	    
 	}
     

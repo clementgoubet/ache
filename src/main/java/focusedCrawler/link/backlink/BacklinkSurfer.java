@@ -31,8 +31,8 @@ import java.net.URLEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.link.LinkStorageConfig.BackSurferConfig;
-import focusedCrawler.util.parser.BackLinkNeighborhood;
 
 public class BacklinkSurfer {
     
@@ -51,18 +51,18 @@ public class BacklinkSurfer {
         }
     }
 
-    public BackLinkNeighborhood[] getLNBacklinks(URL url) throws MalformedURLException, IOException {
+    public LinkMetadata[] getLMBacklinks(URL url) throws MalformedURLException, IOException {
         
         waitTimeLimitIfNecessary();
         
         String urlNoProtocol = URLEncoder.encode(url.toString().substring(7), "UTF-8");
         
-        BackLinkNeighborhood[] links = backlinkApi.downloadBacklinks(urlNoProtocol);
+        LinkMetadata[] links = backlinkApi.downloadBacklinks(urlNoProtocol);
 
         if (links != null) {
             logger.info("Found {} backlinks.", links.length);
             for (int i = 0; i < links.length; i++)
-                logger.info(links[i].getLink());
+                logger.info(links[i].getBacklinkUrls().elementAt(0));
         }
         return links;
     }
@@ -86,3 +86,4 @@ public class BacklinkSurfer {
     }
 
 }
+

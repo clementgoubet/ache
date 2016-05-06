@@ -15,9 +15,9 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.junit.Test;
 
 import focusedCrawler.config.ConfigService;
+import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.link.LinkStorageConfig.BackSurferConfig;
 import focusedCrawler.link.backlink.BacklinkSurfer;
-import focusedCrawler.util.parser.BackLinkNeighborhood;
 
 public class BacklinkSurferTest {
 
@@ -34,7 +34,7 @@ public class BacklinkSurferTest {
         URL url = new URL("http://www.bbc.co.uk/news/health-30577776");
 
         // when
-        BackLinkNeighborhood[] backlinks = surfer.getLNBacklinks(url);
+        LinkMetadata[] backlinks = surfer.getLMBacklinks(url);
         
         // then
         assertThat(backlinks, is(notNullValue()));
@@ -52,7 +52,7 @@ public class BacklinkSurferTest {
         URL url = new URL("http://www.bbc.co.uk");
 
         // when
-        BackLinkNeighborhood[] backlinks = surfer.getLNBacklinks(url);
+        LinkMetadata[] backlinks = surfer.getLMBacklinks(url);
         
         // then
         assertThat(backlinks, is(notNullValue()));
@@ -61,10 +61,10 @@ public class BacklinkSurferTest {
 
     }
 
-    public boolean backLinkSetIsValid(BackLinkNeighborhood[] backlinks) {
+	public boolean backLinkSetIsValid(LinkMetadata[] backlinks) {
         UrlValidator validator = new UrlValidator();
-        for (BackLinkNeighborhood backlink : backlinks) {
-            if (validator.isValid(backlink.getLink()))
+        for (LinkMetadata backlink : backlinks) {
+            if (validator.isValid(backlink.getBacklinkUrls().elementAt(0)))
                 return true;
         }
         return false;

@@ -14,7 +14,7 @@ public class NonRandomLinkSelector implements LinkSelector {
     int[] classCount = new int[classLimits.length];
     
     @Override
-    public LinkRelevance[] select(Frontier frontier, int numberOfLinks) {
+    public LinkRelevance[] select(Frontier frontier, int type, int numberOfLinks) {
         
         PersistentHashtable<LinkRelevance> urlRelevance = frontier.getUrlRelevanceHashtable();
         
@@ -23,17 +23,18 @@ public class NonRandomLinkSelector implements LinkSelector {
         Vector<LinkRelevance> tempList = new Vector<LinkRelevance>();
         for (int i = 0; tempList.size() < numberOfLinks && keys.hasNext(); i++) {
             Tuple<LinkRelevance> tuple = keys.next();
-                LinkRelevance linkRelevance = tuple.getValue();
-                int relevance = (int) linkRelevance.getRelevance();
-                if (relevance > 0) {
-                    int index = relevance / 100;
-                    if (classCount[index] < classLimits[index]) {
-                        if (relevance == 299 || i % 5 == 0) {
-                            tempList.add(linkRelevance);
-                            classCount[index]++;
-                        }
+            LinkRelevance linkRelevance = tuple.getValue();
+            Double relevance = linkRelevance.getRelevance(type);
+            if (relevance != null && relevance > 0) {
+            	int intRelev = relevance.intValue();
+                int index = intRelev / 100;
+                if (classCount[index] < classLimits[index]) {
+                    if (intRelev == 299 || i % 5 == 0) {
+                        tempList.add(linkRelevance);
+                        classCount[index]++;
                     }
                 }
+            }
         }
         return (LinkRelevance[]) tempList.toArray(new LinkRelevance[tempList.size()]);
     }

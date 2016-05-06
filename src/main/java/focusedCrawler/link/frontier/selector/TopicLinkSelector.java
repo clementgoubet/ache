@@ -16,7 +16,7 @@ public class TopicLinkSelector implements LinkSelector {
     int[] classLimits = new int[] { 100, 100, 1500 };
 
     @Override
-    public LinkRelevance[] select(Frontier frontier, int numberOfLinks) {
+    public LinkRelevance[] select(Frontier frontier, int type, int numberOfLinks) {
         PersistentHashtable<LinkRelevance> urlRelevance = frontier.getUrlRelevanceHashtable();
 
         LinkRelevance[] result = null;
@@ -31,9 +31,10 @@ public class TopicLinkSelector implements LinkSelector {
                 String url = URLDecoder.decode(tuple.getKey(), "UTF-8");
                 if (url != null) {
                     LinkRelevance linkRelevance = tuple.getValue();
-                    int relevance = (int) linkRelevance.getRelevance();
-                    if (relevance > 100) {
-                        int index = relevance / 100;
+                    Double relevance = tuple.getValue().getRelevance(type);
+					if(relevance != null && relevance > 100) {
+                        int relevInt = relevance.intValue();
+						int index = relevInt / 100;
                         if (index < 3 && classCount[index] < classLimits[index]) {
                             tempList.add(linkRelevance);
                             count++;

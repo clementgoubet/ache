@@ -33,32 +33,27 @@ public class LinkStorageConfig {
     
     public static class BiparitieGraphRepConfig {
         
-        private String authGraphDirectory = "data_backlinks/auth_graph";
+        private String parentsGraphDirectory = "data_backlinks/parents_graph";
         private String urlIdDirectory = "data_backlinks/url";
-        private String authIdDirectory = "data_backlinks/auth_id";
-        private String hubIdDirectory = "data_backlinks/hub_id";
-        private String hubGraphDirectory = "data_backlinks/hub_graph";
+        private String childrenGraphDirectory = "data_backlinks/children_graph";
+        private String nodeIdDirectory = "data_backlinks/node_id";
         
         public BiparitieGraphRepConfig() { }
         
-        public String getAuthGraphDirectory() {
-            return authGraphDirectory;
+        public String getParentsGraphDirectory() {
+            return parentsGraphDirectory;
         }
         
         public String getUrlIdDirectory() {
             return urlIdDirectory;
         }
         
-        public String getAuthIdDirectory() {
-            return authIdDirectory;
+        public String getChildrenGraphDirectory() {
+            return childrenGraphDirectory;
         }
         
-        public String getHubIdDirectory() {
-            return hubIdDirectory;
-        }
-        
-        public String getHubGraphDirectory() {
-            return hubGraphDirectory;
+        public String getNodeIdDirectory() {
+            return nodeIdDirectory;
         }
         
     }
@@ -66,8 +61,14 @@ public class LinkStorageConfig {
     @JsonProperty("link_storage.max_pages_per_domain")
     private int maxPagesPerDomain = 100;
     
-    @JsonProperty("link_storage.link_classifier.type")
-    private String typeOfClassifier = "LinkClassifierBaseline";
+    @JsonProperty("link_storage.link_classifier.outlinks.type")
+    private String outlinkClassifier = "LinkClassifierBaseline";
+    
+    @JsonProperty("link_storage.link_classifier.backlinks.forward.type")
+    private String backlinkForwardClassifier = "LinkClassifierBaseline";
+    
+    @JsonProperty("link_storage.link_classifier.backlinks.backward.type")
+    private String backlinkBackwardClassifier = "LinkClassifierBaseline";
     
     
     @JsonProperty("link_storage.link_strategy.outlinks")
@@ -80,6 +81,9 @@ public class LinkStorageConfig {
     @JsonProperty("link_storage.directory")
     private String linkDirectory = "data_url/dir";
     
+    @JsonProperty("link_storage.backlink_directory")
+    private String backlinkDirectory = "data_url/backdir";
+    
     @JsonProperty("link_storage.max_size_cache_urls")
     private int maxCacheUrlsSize = 200000;
     
@@ -88,6 +92,9 @@ public class LinkStorageConfig {
     
     @JsonProperty("link_storage.link_strategy.backlinks")
     private boolean getBacklinks = false;
+  
+    @JsonProperty("link_storage.link_strategy.forward_search_engine_links")
+    private boolean getForwardSElinks = false;
     
     
     @JsonProperty("link_storage.online_learning.enabled")
@@ -100,8 +107,14 @@ public class LinkStorageConfig {
     private int learningLimit = 500;
     
     
-    @JsonProperty("link_storage.link_selector")
-    private String linkSelector = "TopkLinkSelector";
+    @JsonProperty("link_storage.link_selector.outlink")
+    private String outlinkSelector = "TopkLinkSelector";
+    
+    @JsonProperty("link_storage.link_selector.backlinks.backward")
+    private String backlinkBackwardSelector = "TopkLinkSelector";
+    
+    @JsonProperty("link_storage.link_selector.backlinks.forward")
+    private String backlinkForwardSelector = "TopkLinkSelector";
     
     // TODO Remove target storage folder dependency from link storage
     private String targetStorageDirectory = "data_target/";
@@ -122,12 +135,24 @@ public class LinkStorageConfig {
         return maxPagesPerDomain;
     }
     
-    public String getTypeOfClassifier() {
-        return typeOfClassifier;
+    public String getTypeOfOutlinkClassifier() {
+        return outlinkClassifier;
+    }
+    
+    public String getTypeOfBacklinkForwardClassifier() {
+        return backlinkForwardClassifier;
+    }
+    
+    public String getTypeOfBacklinkBackwardClassifier() {
+        return backlinkBackwardClassifier;
     }
     
     public boolean getOutlinks() {
         return getOutlinks;
+    }
+    
+    public boolean getForwardSElinks(){
+    	return getForwardSElinks;
     }
     
     public boolean isUseScope() {
@@ -136,6 +161,10 @@ public class LinkStorageConfig {
     
     public String getLinkDirectory() {
         return linkDirectory;
+    }
+    
+    public String getBacklinkDirectory() {
+        return backlinkDirectory;
     }
     
     public int getMaxCacheUrlsSize() {
@@ -174,8 +203,16 @@ public class LinkStorageConfig {
         return backSurferConfig;
     }
 
-    public String getLinkSelector() {
-        return linkSelector;
+    public String getOutlinkSelector() {
+        return outlinkSelector;
+    }
+    
+    public String getBacklinkBackwardSelector() {
+        return backlinkBackwardSelector;
+    }
+    
+    public String getBacklinkForwardSelector() {
+        return backlinkForwardSelector;
     }
 
     public StorageConfig getStorageServerConfig() {

@@ -40,8 +40,8 @@ public class FrontierTest {
     @Test
     public void shouldInsertUrl() throws Exception {
         // given
-        LinkRelevance link1 = new LinkRelevance(new URL("http://www.example1.com/index.html"), 1);
-        LinkRelevance link2 = new LinkRelevance(new URL("http://www.example2.com/index.html"), 1);
+        LinkRelevance link1 = new LinkRelevance(new URL("http://www.example1.com/index.html"), LinkRelevance.DEFAULT_TYPE, 1);
+        LinkRelevance link2 = new LinkRelevance(new URL("http://www.example2.com/index.html"), LinkRelevance.DEFAULT_TYPE, 1);
         
         // when
         frontier.insert(link1);
@@ -54,8 +54,8 @@ public class FrontierTest {
     @Test
     public void shouldInsertUrlsAndSelectGivenNumberOfUrls() throws Exception {
         // given
-        LinkRelevance link1 = new LinkRelevance(new URL("http://www.example1.com/index.html"), 1);
-        LinkRelevance link2 = new LinkRelevance(new URL("http://www.example2.com/index.html"), 2);
+        LinkRelevance link1 = new LinkRelevance(new URL("http://www.example1.com/index.html"), LinkRelevance.DEFAULT_TYPE, 1);
+        LinkRelevance link2 = new LinkRelevance(new URL("http://www.example2.com/index.html"), LinkRelevance.DEFAULT_TYPE, 2);
         
         // when
         frontier.insert(link1);
@@ -73,7 +73,7 @@ public class FrontierTest {
     @Test
     public void shouldInsertAndDeleteUrl() throws Exception {
         // given
-        LinkRelevance link1 = new LinkRelevance(new URL("http://www.example1.com/index.html"), 1);
+        LinkRelevance link1 = new LinkRelevance(new URL("http://www.example1.com/index.html"), LinkRelevance.DEFAULT_TYPE, 1);
         
         // when
         frontier.insert(link1);

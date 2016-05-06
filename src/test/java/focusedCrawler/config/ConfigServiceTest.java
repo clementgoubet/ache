@@ -79,14 +79,14 @@ public class ConfigServiceTest {
         assertThat(config.getBacklinks(), is(true));
         assertThat(config.isUseScope(), is(true));
         
-        assertThat(config.getTypeOfClassifier(), is("LinkClassifierImpl"));
+        assertThat(config.getTypeOfOutlinkClassifier(), is("LinkClassifierImpl"));
         // TODO: add parameters for link classifier
         
         assertThat(config.isUseOnlineLearning(), is(false));
         assertThat(config.getOnlineMethod(), is("FORWARD_CLASSIFIER_BINARY"));
         assertThat(config.getLearningLimit(), is(555));
         
-        assertThat(config.getLinkSelector(), is("TopkLinkSelector"));
+        assertThat(config.getOutlinkSelector(), is("TopkLinkSelector"));
         
         assertThat(config.getMaxSizeLinkQueue(), is(111111));
         assertThat(config.getMaxCacheUrlsSize(), is(222222));

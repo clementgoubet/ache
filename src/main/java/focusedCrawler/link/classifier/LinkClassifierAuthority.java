@@ -6,10 +6,10 @@ import java.util.HashMap;
 
 import weka.classifiers.Classifier;
 import weka.core.Instances;
+import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.link.classifier.builder.Instance;
 import focusedCrawler.link.classifier.builder.LinkNeighborhoodWrapper;
 import focusedCrawler.link.frontier.LinkRelevance;
-import focusedCrawler.util.parser.LinkNeighborhood;
 import focusedCrawler.util.parser.PaginaURL;
 
 public class LinkClassifierAuthority implements LinkClassifier{
@@ -36,7 +36,10 @@ public class LinkClassifierAuthority implements LinkClassifier{
 	  }
 
 	  
-	  public LinkRelevance[] classify(PaginaURL page) throws LinkClassifierException {
+	  public LinkRelevance[] classify(PaginaURL page, int type) throws LinkClassifierException {
+		  if(type == LinkRelevance.TYPE_BACKLINK_BACKWARD){
+			  throw new IllegalArgumentException("This classifier is not suited for TYPE_BACKLINK_BACKWARD (classifying whether a page URL is worth backlinking)");
+		  }
 		  try {
 		      LinkRelevance[] linkRelevance = null;
 			  if(classifier != null){
@@ -57,18 +60,18 @@ public class LinkClassifierAuthority implements LinkClassifier{
 		        		  double[] prob = classifier.distributionForInstance(instanceWeka);
 		        		  relevance = LinkRelevance.DEFAULT_AUTH_RELEVANCE + (prob[0]*100);
 		        	  }
-			          linkRelevance[count] = new LinkRelevance(url, relevance);
+			          linkRelevance[count] = new LinkRelevance(url, type, relevance);
 			          count++;
 		          }
 			  }else{
-				  LinkNeighborhood[] lns = page.getLinkNeighboor();
-				  linkRelevance = new LinkRelevance[lns.length];
-				  for (int i = 0; i < lns.length; i++) {
+				  LinkMetadata[] lms = page.getLinkMetadatas();
+				  linkRelevance = new LinkRelevance[lms.length];
+				  for (int i = 0; i < lms.length; i++) {
 					  double relevance = -1;
-					  if(!page.getURL().getHost().equals(lns[i].getLink().getHost())){
+					  if(!page.getURL().getHost().equals(lms[i].getLink().getHost())){
 						  relevance = LinkRelevance.DEFAULT_AUTH_RELEVANCE+1;
 					  }
-					  linkRelevance[i] = new LinkRelevance(lns[i].getLink(), relevance);
+					  linkRelevance[i] = new LinkRelevance(lms[i].getLink(), type, relevance);
 				  }
 			  }
 			  return linkRelevance;
@@ -82,10 +85,10 @@ public class LinkClassifierAuthority implements LinkClassifier{
 	  }
 
 	@Override
-	public LinkRelevance classify(LinkNeighborhood ln) throws LinkClassifierException {
+	public LinkRelevance classify(LinkMetadata lm, int type) throws LinkClassifierException {
 		  LinkRelevance linkRel = null;
 		  try{
-		      HashMap<String, Instance> urlWords = wrapper.extractLinks(ln, attributes);
+		      HashMap<String, Instance> urlWords = wrapper.extractLinks(lm, attributes);
 		      
 	    	  for (String url : urlWords.keySet()) {
 		    	  double relevance = -1;
@@ -104,7 +107,7 @@ public class LinkClassifierAuthority implements LinkClassifier{
 		    			  relevance = LinkRelevance.DEFAULT_AUTH_RELEVANCE+1;		            	
 		    		  }
 		    	  }
-	    		  linkRel = new LinkRelevance(new URL(url),relevance);
+	    		  linkRel = new LinkRelevance(new URL(url),type,relevance);
 		      }
 		  } catch (MalformedURLException ex) {
 			  ex.printStackTrace();
@@ -115,6 +118,19 @@ public class LinkClassifierAuthority implements LinkClassifier{
 		  }
 		  return linkRel;
 	}
+	
+	  public LinkRelevance[] classify(LinkMetadata[] lms, int type) throws LinkClassifierException{
+		  if(lms == null){
+			  return null;
+		  }
+		  else{
+			  LinkRelevance[] result = new LinkRelevance[lms.length];
+				for(int i=0; i< lms.length; i++){
+					result[i]=classify(lms[i],type);
+				}
+				return result;
+		  }
+	  }
 		  
 	private boolean isRootPage(String urlStr) throws MalformedURLException {
 		boolean result = false;

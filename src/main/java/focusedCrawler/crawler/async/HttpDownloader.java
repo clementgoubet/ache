@@ -87,7 +87,7 @@ public class HttpDownloader implements Closeable {
     }
     
     public Future<FetchedResult> dipatchDownload(URL url, Callback callback) {
-        return dipatchDownload(new LinkRelevance(url, 0d), callback);
+        return dipatchDownload(new LinkRelevance(url, LinkRelevance.DEFAULT_TYPE, 0d), callback);
     }
     
     public Future<FetchedResult> dipatchDownload(LinkRelevance link, Callback callback) {

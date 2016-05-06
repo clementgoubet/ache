@@ -26,9 +26,10 @@ package focusedCrawler.link.classifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Random;
-import focusedCrawler.util.parser.PaginaURL;
+
+import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.link.frontier.LinkRelevance;
-import focusedCrawler.util.parser.LinkNeighborhood;
+import focusedCrawler.util.parser.PaginaURL;
 
 /**
  *
@@ -45,7 +46,6 @@ import focusedCrawler.util.parser.LinkNeighborhood;
 public class LinkClassifierBaseline implements LinkClassifier{
 
   private Random randomGenerator;
-//  private int limit = 100;
 
   public LinkClassifierBaseline() {
      this.randomGenerator = new Random();
@@ -57,19 +57,28 @@ public class LinkClassifierBaseline implements LinkClassifier{
    * @param page Page
    * @return LinkRelevance[]
    */
-  public LinkRelevance[] classify(PaginaURL page) throws LinkClassifierException {
+  public LinkRelevance[] classify(PaginaURL page, int type) throws LinkClassifierException {
         try {
-        	URL[] links = page.links();
+        	URL[] links;
+        	if(type == LinkRelevance.TYPE_BACKLINK_FORWARD || type == LinkRelevance.TYPE_BACKLINK_FORWARD){
+        		links = page.links();
+        	}
+        	else if(type == LinkRelevance.TYPE_BACKLINK_BACKWARD){
+        		links = new URL[1];
+        		links[0] = page.getURL();
+        	}
+        	else{
+        		throw new IllegalArgumentException("type "+type+" not yet implemented");
+        	}
         	LinkRelevance[] linkRelevance = new LinkRelevance[links.length];
 
         	for (int i = 0; i < links.length; i++) {
             	String url = links[i].toString();
         		double relevance = 100;
-//        		relevance = page.getRelevance()*100;
         		if(relevance == 100){
         			relevance = relevance + randomGenerator.nextInt(100);
         		}
-        		linkRelevance[i] = new LinkRelevance(new URL(url), relevance);
+        		linkRelevance[i] = new LinkRelevance(new URL(url), type, relevance);
 			}
         	return linkRelevance;
         }
@@ -78,8 +87,33 @@ public class LinkClassifierBaseline implements LinkClassifier{
         }
   }
 
-  public LinkRelevance classify(LinkNeighborhood ln) throws LinkClassifierException{
-	  return null;
+  public LinkRelevance classify(LinkMetadata lm, int type) throws LinkClassifierException{
+  		double relevance = 100 + randomGenerator.nextInt(100);
+  		try {
+  			if(lm != null && lm.getUrl() != null){
+  				return new LinkRelevance(new URL(lm.getUrl()), type, relevance);
+  			}
+  			else if(lm != null && lm.getBacklinkUrls().size()>0){
+  				return new LinkRelevance(new URL(lm.getBacklinkUrls().elementAt(0)), type, relevance);
+  			}
+  			else
+  				return null;
+		} catch (MalformedURLException e) {
+			throw new LinkClassifierException(e.getMessage(), e);
+		}
+  }
+  
+  public LinkRelevance[] classify(LinkMetadata[] lms, int type) throws LinkClassifierException{
+	  if(lms == null){
+		  return null;
+	  }
+	  else{
+		  LinkRelevance[] result = new LinkRelevance[lms.length];
+			for(int i=0; i< lms.length; i++){
+				result[i]=classify(lms[i],type);
+			}
+			return result;
+	  }
   }
   
  }

@@ -13,3 +13,6 @@ config/humantrafficking
 config/escort
 /bin/
 .DS_Store*
+/outputs
+/configtor
+/seeds

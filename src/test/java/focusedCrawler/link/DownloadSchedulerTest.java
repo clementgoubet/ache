@@ -12,12 +12,12 @@ public class DownloadSchedulerTest {
 
     @Test
     public void shouldSelectLinksBasedOnPolitenes() throws Exception {
-        LinkRelevance l1 = new LinkRelevance("http://ex1.com/", 1);
-        LinkRelevance l2 = new LinkRelevance("http://ex2.com/", 2);
+        LinkRelevance l1 = new LinkRelevance("http://ex1.com/", LinkRelevance.DEFAULT_TYPE, 1);
+        LinkRelevance l2 = new LinkRelevance("http://ex2.com/", LinkRelevance.DEFAULT_TYPE, 2);
         
-        LinkRelevance l3 = new LinkRelevance("http://ex1.com/3", 3);
-        LinkRelevance l4 = new LinkRelevance("http://ex2.com/4", 4);
-        LinkRelevance l5 = new LinkRelevance("http://ex3.com/5", 5);
+        LinkRelevance l3 = new LinkRelevance("http://ex1.com/3", LinkRelevance.DEFAULT_TYPE, 3);
+        LinkRelevance l4 = new LinkRelevance("http://ex2.com/4", LinkRelevance.DEFAULT_TYPE, 4);
+        LinkRelevance l5 = new LinkRelevance("http://ex3.com/5", LinkRelevance.DEFAULT_TYPE, 5);
                 
         int minimumAccessTime = 500;
         int maxLinksInScheduler = 100;
@@ -74,8 +74,9 @@ public class DownloadSchedulerTest {
     
     @Test
     public void addLinksShouldBlockWhenMaxNumberOfLinksIsReached() throws Exception {
-        LinkRelevance l1 = new LinkRelevance("http://ex1.com/", 1);
-        LinkRelevance l2 = new LinkRelevance("http://ex2.com/", 2);
+    	// Note: type is set to 1 by default
+        LinkRelevance l1 = new LinkRelevance("http://ex1.com/", LinkRelevance.DEFAULT_TYPE, 1);
+        LinkRelevance l2 = new LinkRelevance("http://ex2.com/", LinkRelevance.DEFAULT_TYPE, 2);
                 
         int minimumAccessTime = 100;
         int maxLinksInScheduler = 1;
@@ -111,8 +112,9 @@ public class DownloadSchedulerTest {
     @Test
     public void nextLinksShouldWaitMinimumAccessTimeOfDomain() throws Exception {
         // given
-        LinkRelevance l1 = new LinkRelevance("http://ex1.com/1", 1);
-        LinkRelevance l2 = new LinkRelevance("http://ex1.com/2", 2);
+    	// Note: type is set to 1 by default
+        LinkRelevance l1 = new LinkRelevance("http://ex1.com/1", LinkRelevance.DEFAULT_TYPE, 1);
+        LinkRelevance l2 = new LinkRelevance("http://ex1.com/2", LinkRelevance.DEFAULT_TYPE, 2);
                 
         int minimumAccessTime = 500;
         int maxLinksInScheduler = 10;

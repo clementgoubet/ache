@@ -5,10 +5,10 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.link.classifier.builder.Instance;
 import focusedCrawler.link.classifier.builder.LinkNeighborhoodWrapper;
 import focusedCrawler.link.frontier.LinkRelevance;
-import focusedCrawler.util.parser.LinkNeighborhood;
 import focusedCrawler.util.parser.PaginaURL;
 
 public class LinkClassifierBacklink implements LinkClassifier {
@@ -21,7 +21,10 @@ public class LinkClassifierBacklink implements LinkClassifier {
         this.attributes = attribute;
     }
 
-    public LinkRelevance[] classify(PaginaURL page) throws LinkClassifierException {
+    public LinkRelevance[] classify(PaginaURL page, int type) throws LinkClassifierException {
+		if(type == LinkRelevance.TYPE_BACKLINK_BACKWARD){
+			throw new IllegalArgumentException("This classifier is not suited for TYPE_BACKLINK_BACKWARD (classifying whether a page URL is worth backlinking)");
+		}
         LinkRelevance[] linkRelevance = null;
         try {
             HashMap<String, Instance> urlWords = wrapper.extractLinks(page, attributes);
@@ -40,7 +43,7 @@ public class LinkClassifierBacklink implements LinkClassifier {
                     }
                 }
 
-                linkRelevance[count] = new LinkRelevance(url, relevance);
+                linkRelevance[count] = new LinkRelevance(url, type, relevance);
                 count++;
             }
         } catch (MalformedURLException ex) {
@@ -51,10 +54,14 @@ public class LinkClassifierBacklink implements LinkClassifier {
     }
 
     @Override
-    public LinkRelevance classify(LinkNeighborhood ln) throws LinkClassifierException {
+    public LinkRelevance classify(LinkMetadata lm, int type) throws LinkClassifierException {
         // TODO Auto-generated method stub
         return null;
     }
+    
+	public LinkRelevance[] classify(LinkMetadata[] lms, int type) throws LinkClassifierException{
+		return null;
+	}
 
     private boolean isInitialPage(String urlStr) throws MalformedURLException {
         boolean result = false;

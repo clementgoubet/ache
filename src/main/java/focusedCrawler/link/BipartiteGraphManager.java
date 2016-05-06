@@ -25,21 +25,20 @@ package focusedCrawler.link;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.HashMap;
-import java.util.ArrayList;
 
 import focusedCrawler.link.backlink.BacklinkSurfer;
 import focusedCrawler.link.classifier.LinkClassifier;
 import focusedCrawler.link.classifier.LinkClassifierException;
+import focusedCrawler.link.frontier.Frontier;
 import focusedCrawler.link.frontier.FrontierManager;
 import focusedCrawler.link.frontier.FrontierPersistentException;
 import focusedCrawler.link.frontier.LinkRelevance;
 import focusedCrawler.target.model.Page;
-import focusedCrawler.util.parser.BackLinkNeighborhood;
-import focusedCrawler.util.parser.LinkNeighborhood;
 import focusedCrawler.util.parser.PaginaURL;
 
 /**
@@ -54,8 +53,10 @@ public class BipartiteGraphManager {
 	
 	private BacklinkSurfer surfer;
 	
-	private LinkClassifier backlinkClassifier;
-	
+	private LinkClassifier backlinkForwardClassifier;
+
+	private LinkClassifier backlinkBackwardClassifier;
+
 	private LinkClassifier outlinkClassifier;
 
 	private BipartiteGraphRepository rep;
@@ -76,10 +77,13 @@ public class BipartiteGraphManager {
 		this.domainCounter = new HashMap<String, Integer>();
 	}
 	
-	public BipartiteGraphManager(FrontierManager frontierManager, BipartiteGraphRepository rep, LinkClassifier outlinkClassifier, LinkClassifier backlinkClassifier) {
+
+	public BipartiteGraphManager(FrontierManager frontierManager, BipartiteGraphRepository rep, LinkClassifier outlinkClassifier,
+								 LinkClassifier backlinkForwardClassifier, LinkClassifier backlinkBackwardClassifier) {
 		this.frontierManager = frontierManager;
 		this.outlinkClassifier = outlinkClassifier;
-		this.backlinkClassifier = backlinkClassifier;
+		this.backlinkForwardClassifier = backlinkForwardClassifier;
+		this.backlinkBackwardClassifier=backlinkBackwardClassifier;
 		this.rep = rep;
 		this.domainCounter = new HashMap<String, Integer>();
 	}
@@ -92,8 +96,12 @@ public class BipartiteGraphManager {
 		this.surfer = surfer;
 	}
 	
-	public void setBacklinkClassifier(LinkClassifier classifier){
-		this.backlinkClassifier = classifier;
+	public void setBacklinkBackwardClassifier(LinkClassifier classifier){
+		this.backlinkBackwardClassifier = classifier;
+	}
+	
+	public void setBacklinkForwardClassifier(LinkClassifier classifier){
+		this.backlinkForwardClassifier = classifier;
 	}
 
 	public void setOutlinkClassifier(LinkClassifier classifier){
@@ -107,70 +115,90 @@ public class BipartiteGraphManager {
 	
     public void insertOutlinks(Page page) throws IOException, FrontierPersistentException, LinkClassifierException {
     	
-        PaginaURL parsedPage = page.getPageURL();
-        parsedPage.setRelevance(page.getRelevance());
-        
-        LinkRelevance[] linksRelevance = outlinkClassifier.classify(parsedPage);
-        
+    	LinkMetadata[] lms = rep.getOutlinksLM(page.getURL());
+         
+        LinkRelevance[] linksRelevance = outlinkClassifier.classify(lms,LinkRelevance.TYPE_FORWARD);
+       
         ArrayList<LinkRelevance> temp = new ArrayList<LinkRelevance>();
         HashSet<String> relevantURLs = new HashSet<String>();
-                
-        for (int i = 0; i < linksRelevance.length; i++) {
-        	//System.out.println("linksRelevance.length "+linksRelevance.length);
-            if (frontierManager.isRelevant(linksRelevance[i])) {
-                            	
-                String url = linksRelevance[i].getURL().toString();
-                //System.out.println(url);
-                if (!relevantURLs.contains(url)) {
-                    
-                    String domain = linksRelevance[i].getTopLevelDomainName();
-                    Integer domainCount = domainCounter.get(domain);
-                    
-                    if (domainCount == null)
-                        domainCount = 0;
-                    
-                    if (domainCount < maxPages) {// Stop Condition
-                        domainCount++;
-                        domainCounter.put(domain, domainCount);
-                        relevantURLs.add(url);
-                        temp.add(linksRelevance[i]);
-                    }
-                    
-                }
-            }
+        
+        if(linksRelevance != null){
+	        for (int i = 0; i < linksRelevance.length; i++) {
+	            if (frontierManager.isRelevant(linksRelevance[i],Frontier.LINK_FRONTIER_ID)) {
+	                            	
+	                String url = linksRelevance[i].getURL().toString();
+	                if (!relevantURLs.contains(url)) {
+	                    
+	                    String domain = linksRelevance[i].getTopLevelDomainName();
+	                    Integer domainCount = domainCounter.get(domain);
+	                    
+	                    if (domainCount == null)
+	                        domainCount = 0;
+	                    
+	                    if (domainCount < maxPages) {// Stop Condition
+	                        domainCount++;
+	                        domainCounter.put(domain, domainCount);
+	                        relevantURLs.add(url);
+	                        temp.add(linksRelevance[i]);
+	                    }
+	                    
+	                }
+	            }
+	        }
         }
 
         LinkRelevance[] filteredLinksRelevance = temp.toArray(new LinkRelevance[relevantURLs.size()]);
         
-        LinkNeighborhood[] lns = parsedPage.getLinkNeighboor();
-        for (int i = 0; i < lns.length; i++) {
-            if (!relevantURLs.contains(lns[i].getLink().toString())) {
-                lns[i] = null;
+        /*LinkMetadata[] lms2 = page.getPageURL().getLinkMetadatas();
+        for (int i = 0; i < lms2.length; i++) {
+            if (!relevantURLs.contains(lms2[i].getUrl())) {
+                lms2[i] = null;
             }
         }
         
-        rep.insertOutlinks(page.getURL(), lns);
-        frontierManager.insert(filteredLinksRelevance);
+        rep.insertOutlinks(page.getURL(), lms2);*/
+        frontierManager.insert(filteredLinksRelevance,Frontier.LINK_FRONTIER_ID);
+
+        /*if (count == pagesToCommit) {
+            rep.commit();
+            count = 0;
+        }
+        count++;*/
+    }
+	
+    // classifies page URL to decide whether to crawl backwards or not
+    public void insertBacklinks(Page page) throws IOException, FrontierPersistentException, LinkClassifierException {
+    	
+        LinkMetadata lm = rep.getLM(page.getURL());
         
+        LinkRelevance linkRelevance = backlinkBackwardClassifier.classify(lm,LinkRelevance.TYPE_BACKLINK_BACKWARD);
+        
+        if(frontierManager.isRelevant(linkRelevance, Frontier.BACKLINK_FRONTIER_ID)){ 
+            frontierManager.insert(linkRelevance,Frontier.BACKLINK_FRONTIER_ID);
+        }
+        
+    	//frontierManager.getFrontier().commit();
         if (count == pagesToCommit) {
             rep.commit();
             count = 0;
         }
         count++;
-    }
-	
-	public void insertBacklinks(Page page) throws IOException, FrontierPersistentException, LinkClassifierException{
-		URL url = page.getURL();
-		BackLinkNeighborhood[] links = rep.getBacklinks(url);
+    } 
+    
+    // grabs backlinks and classifies them
+	public void insertBacklinks(URL url) throws IOException, FrontierPersistentException, LinkClassifierException{
+		LinkMetadata[] links = rep.getBacklinksLM(url);
 		if(links == null || (links != null && links.length < 10)){
-			links = surfer.getLNBacklinks(url);	
+			links = surfer.getLMBacklinks(url);	
+
 		}
 		if(links != null && links.length > 0){
 			LinkRelevance[] linksRelevance = new LinkRelevance[links.length];
 			for (int i = 0; i < links.length; i++){
 				if(links[i] != null){
-					LinkNeighborhood ln = new LinkNeighborhood(new URL(links[i].getLink()));
-					String title = links[i].getTitle();
+					// TITLE TOKENISING MUST BE DOE SOMEWHERE
+					/*LinkMetadata lm = new LinkMetadata(new URL(links[i].getUrl()));
+					String title = links[i].getBacklinkTitle();
 					if(title != null){
 						StringTokenizer tokenizer = new StringTokenizer(title," ");
 						Vector<String> anchorTemp = new Vector<String>();
@@ -179,20 +207,22 @@ public class BipartiteGraphManager {
 			   		  	}
 			   		  	String[] aroundArray = new String[anchorTemp.size()];
 			   		  	anchorTemp.toArray(aroundArray);
-			   		  	ln.setAround(aroundArray);
-					}
-					linksRelevance[i] = backlinkClassifier.classify(ln);
+			   		  	lm.setAround(aroundArray);
+					}*/
+					linksRelevance[i] = backlinkForwardClassifier.classify(links[i],LinkRelevance.TYPE_BACKLINK_FORWARD);
 				}
 			}
-			frontierManager.insert(linksRelevance);
+			frontierManager.insert(linksRelevance,Frontier.LINK_FRONTIER_ID);
+			
+			URL normalizedURL = new URL(url.getProtocol(), url.getHost(), "/"); 
+			rep.insertBacklinks(normalizedURL, links);
 		}
-		URL normalizedURL = new URL(url.getProtocol(), url.getHost(), "/"); 
-		rep.insertBacklinks(normalizedURL, links);
-		if(count == pagesToCommit){
+
+/*		if(count == pagesToCommit){
 			rep.commit();
 			count = 0;
 		}
-		count++;
+		count++;*/
 	}
 
 }

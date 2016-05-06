@@ -35,7 +35,7 @@ package focusedCrawler.util.vsm;
 public class VSMElement {
 
   private String word;
-  private double weight;
+  private Double weight;
 
   public VSMElement(String word, double weight) {
     this.word = word;
@@ -46,7 +46,7 @@ public class VSMElement {
     return word;
   }
 
-  public double getWeight(){
+  public Double getWeight(){
     return weight;
   }
 
@@ -54,7 +54,7 @@ public class VSMElement {
     this.word = word;
   }
 
-  public void setWeight(double weight){
+  public void setWeight(Double weight){
     this.weight = weight;
   }
 

@@ -254,7 +254,7 @@ public class WekaTargetClassifierBuilder {
     	header.append("\n");
     	StringBuffer tail = new StringBuffer();
   
-    	Vector<VSMElement> bestWordsForm  = new Vector<>(df.values());
+    	Vector<VSMElement> bestWordsForm  = new Vector<>(df.values());	
     	Collections.sort(bestWordsForm, new VSMElementComparator());
     	for(int i=0; i<=numOfFeatures && i < bestWordsForm.size(); i++){
     		VSMElement elem = (VSMElement)bestWordsForm.elementAt(i);
@@ -290,7 +290,7 @@ public class WekaTargetClassifierBuilder {
         			if (elemForm != null){
         				tail.append(j);
         				tail.append(" ");
-        				tail.append((int)elemForm.getWeight());
+        				tail.append(elemForm.getWeight().intValue());
         				tail.append(",");
         			}
         		}
@@ -329,7 +329,7 @@ public class WekaTargetClassifierBuilder {
                     if (elemForm != null){
                     	tail.append(j);
                     	tail.append(" ");
-                        tail.append((int)elemForm.getWeight());
+                        tail.append(elemForm.getWeight().intValue());
                         tail.append(",");
                     }
         		}

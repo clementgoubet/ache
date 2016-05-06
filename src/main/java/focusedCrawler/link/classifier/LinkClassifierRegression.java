@@ -9,17 +9,17 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
+import weka.classifiers.Classifier;
+import weka.core.Instances;
+import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.link.classifier.builder.Instance;
-import focusedCrawler.link.classifier.builder.WordField;
 import focusedCrawler.link.classifier.builder.LinkNeighborhoodWrapper;
+import focusedCrawler.link.classifier.builder.WordField;
 import focusedCrawler.link.frontier.LinkRelevance;
 import focusedCrawler.util.ParameterFile;
-import focusedCrawler.util.parser.LinkNeighborhood;
 import focusedCrawler.util.parser.PaginaURL;
 import focusedCrawler.util.string.StopList;
 import focusedCrawler.util.string.StopListArquivo;
-import weka.classifiers.Classifier;
-import weka.core.Instances;
 
 public class LinkClassifierRegression implements LinkClassifier{
 
@@ -35,8 +35,11 @@ public class LinkClassifierRegression implements LinkClassifier{
 		  this.attributes = attributes;
 	  }
 	  
-	public LinkRelevance[] classify(PaginaURL page)
+	public LinkRelevance[] classify(PaginaURL page, int type)
 			throws LinkClassifierException {
+		if(type == LinkRelevance.TYPE_BACKLINK_BACKWARD){
+			throw new IllegalArgumentException("This classifier is not suited for TYPE_BACKLINK_BACKWARD (classifying whether a page URL is worth backlinking)");
+		}
 	    LinkRelevance[] linkRelevance = null;
 	    try {
 	      Map<String, Instance> urlWords = wrapper.extractLinks(page, attributes);
@@ -60,7 +63,7 @@ public class LinkClassifierRegression implements LinkClassifier{
 	        	
 //	        System.out.println(">>>>RELEVANCE:" + relevance);
 //	        double relevance = classificationResult*100 + random.nextInt(100);
-	        linkRelevance[count] = new LinkRelevance(new URL(url),relevance);
+	        linkRelevance[count] = new LinkRelevance(new URL(url),type,relevance);
 	        count++;
 	      }
 	    }catch (MalformedURLException ex) {
@@ -83,11 +86,11 @@ public class LinkClassifierRegression implements LinkClassifier{
 	     return result;
 	}
 	
-	public LinkRelevance classify(LinkNeighborhood ln)
+	public LinkRelevance classify(LinkMetadata lm, int type)
 			throws LinkClassifierException {
 	    LinkRelevance linkRel = null;
 	    try {
-	      Map<String, Instance> urlWords = wrapper.extractLinks(ln, attributes);
+	      Map<String, Instance> urlWords = wrapper.extractLinks(lm, attributes);
 	      Iterator<String> iter = urlWords.keySet().iterator();
 	      while(iter.hasNext()){
 	        String url = (String)iter.next();
@@ -98,7 +101,7 @@ public class LinkClassifierRegression implements LinkClassifier{
 	        double classificationResult = classifier.classifyInstance(instanceWeka);
 	        double[] prob = classifier.distributionForInstance(instanceWeka);
 	        double relevance = classificationResult*100 + prob[(int)classificationResult]*100;	
-	        linkRel = new LinkRelevance(new URL(url),relevance);
+	        linkRel = new LinkRelevance(new URL(url),type,relevance);
 	      }
 	    }
 	    catch (MalformedURLException ex) {
@@ -111,6 +114,19 @@ public class LinkClassifierRegression implements LinkClassifier{
 	    }
 	    return linkRel;
 	}
+	
+	  public LinkRelevance[] classify(LinkMetadata[] lms, int type) throws LinkClassifierException{
+		  if(lms == null){
+			  return null;
+		  }
+		  else{
+			  LinkRelevance[] result = new LinkRelevance[lms.length];
+				for(int i=0; i< lms.length; i++){
+					result[i]=classify(lms[i],type);
+				}
+				return result;
+		  }
+	  }
 	
 	public static void main(String[] args) {
 		try{
@@ -169,10 +185,10 @@ public class LinkClassifierRegression implements LinkClassifier{
 //		                                            attributes,
 //		                                            config.getParamInt("LEVEL"));
 	      linkClassifier = new LinkClassifierRegression(classifier, insts, wrapper,attributes);
-	      LinkNeighborhood ln = new LinkNeighborhood(new URL("http://www.new.com/sport"));
-	      ln.setAnchor(new String[]{"advertis","subscrib","opinion","site", "obituari"});
-	      ln.setAround(new String[]{"advertis","subscrib","opinion","site", "obituari"});
-	      LinkRelevance lr = linkClassifier.classify(ln);
+	      LinkMetadata lm = new LinkMetadata(new URL("http://www.new.com/sport"));
+	      lm.setAnchor(new String[]{"advertis","subscrib","opinion","site", "obituari"});
+	      lm.setAround(new String[]{"advertis","subscrib","opinion","site", "obituari"});
+	      LinkRelevance lr = linkClassifier.classify(lm,1);
 	      System.out.println(lr.getRelevance());
 
 		}catch(Exception ex){

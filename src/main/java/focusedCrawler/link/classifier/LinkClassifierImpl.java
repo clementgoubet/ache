@@ -25,8 +25,8 @@ package focusedCrawler.link.classifier;
 
 import java.net.MalformedURLException;
 
+import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.link.frontier.LinkRelevance;
-import focusedCrawler.util.parser.LinkNeighborhood;
 import focusedCrawler.util.parser.PaginaURL;
 
 /**
@@ -48,11 +48,11 @@ public class LinkClassifierImpl implements LinkClassifier{
 
 	private int[] weights;
 	private int intervalRandom = 100;
-	private LNClassifier lnClassifier;
+	private LMClassifier lmClassifier;
 
-	public LinkClassifierImpl(LNClassifier lnClassifier) {
+	public LinkClassifierImpl(LMClassifier lmClassifier) {
 		this.weights = new int[]{2,1,0};
-		this.lnClassifier = lnClassifier;
+		this.lmClassifier = lmClassifier;
 	}
 
   /**
@@ -62,26 +62,35 @@ public class LinkClassifierImpl implements LinkClassifier{
    * @return LinkRelevance[]
    * @throws LinkClassifierException
    */
-  public LinkRelevance[] classify(PaginaURL page) throws LinkClassifierException {
+	
+	// SHOULD NOT BE USED!!!
+/*  public LinkRelevance[] classify(PaginaURL page, int type) throws LinkClassifierException {
+	  if(type == LinkRelevance.TYPE_BACKLINK_BACKWARD){
+		  throw new IllegalArgumentException("This classifier is not suited for type TYPE_BACKLINK_BACKWARD");
+	  }
 	  LinkRelevance[] linkRelevance = null;
 	  try {
-		  LinkNeighborhood[] lns = page.getLinkNeighboor();
+		  LinkMetadata[] lms = page.getLinkMetadatas();
 		  linkRelevance = new LinkRelevance[lns.length];
 		  for (int i = 0; i < lns.length; i++) {
-			  linkRelevance[i] = classify(lns[i]);
+			  linkRelevance[i] = classify(lns[i], type);
 		  }
 	  }catch(Exception ex){
 		  ex.printStackTrace();
 		  throw new LinkClassifierException(ex.getMessage());
 	  }
 	  return linkRelevance;
+  }*/
+  
+  public LinkRelevance[] classify(PaginaURL page, int type) throws LinkClassifierException {
+	  throw new IllegalArgumentException("This classifier is not suited for this use");
   }
 
-  public LinkRelevance classify(LinkNeighborhood ln) throws LinkClassifierException {
+  public LinkRelevance classify(LinkMetadata lm, int type) throws LinkClassifierException {
 
 	  LinkRelevance linkRel = null;
 	  try {
-		  double[] prob = lnClassifier.classify(ln);
+		  double[] prob = lmClassifier.classify(lm);
 		  int classificationResult = -1;
 		  double maxProb = -1;
 		  for (int i = 0; i < prob.length; i++) {
@@ -96,7 +105,7 @@ public class LinkClassifierImpl implements LinkClassifier{
 		  }
 		  classificationResult = weights[classificationResult];
 		  double result = (classificationResult * intervalRandom) + probability ;  	
-		  linkRel = new LinkRelevance(ln.getLink(),result);
+		  linkRel = new LinkRelevance(lm.getLink(),type,result);
 	  }catch (MalformedURLException ex) {
 		  ex.printStackTrace();
 		  throw new LinkClassifierException(ex.getMessage());
@@ -105,6 +114,19 @@ public class LinkClassifierImpl implements LinkClassifier{
 		  throw new LinkClassifierException(ex.getMessage());
 	  }
 	  return linkRel;
+  }
+  
+  public LinkRelevance[] classify(LinkMetadata[] lms, int type) throws LinkClassifierException{
+	  if(lms == null){
+		  return null;
+	  }
+	  else{
+		  LinkRelevance[] result = new LinkRelevance[lms.length];
+			for(int i=0; i< lms.length; i++){
+				result[i]=classify(lms[i],type);
+			}
+			return result;
+	  }
   }
 
 }

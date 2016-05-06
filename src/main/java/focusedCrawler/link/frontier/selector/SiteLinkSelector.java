@@ -13,7 +13,7 @@ import focusedCrawler.util.persistence.Tuple;
 public class SiteLinkSelector implements LinkSelector {
     
     @Override
-    public LinkRelevance[] select(Frontier frontier, int numberOfLinks) {
+public LinkRelevance[] select(Frontier frontier, int type, int numberOfLinks) {
 
         PersistentHashtable<LinkRelevance> urlRelevance = frontier.getUrlRelevanceHashtable();
         int numberOfHostsInScope = frontier.getScope().size();

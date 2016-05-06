@@ -2,9 +2,9 @@ package focusedCrawler.link.backlink;
 
 import java.io.IOException;
 
-import focusedCrawler.util.parser.BackLinkNeighborhood;
+import focusedCrawler.link.LinkMetadata;
 
 public interface BacklinkApi {
 
-    public BackLinkNeighborhood[] downloadBacklinks(String url) throws IOException;
+    public LinkMetadata[] downloadBacklinks(String url) throws IOException;
 }

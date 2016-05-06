@@ -50,12 +50,16 @@ public class VSMElementComparator implements Comparator<Object> {
      *   argument is less than, equal to, or greater than the second.
      */
     public int compare(Object o1, Object o2) {
-        if(((VSMElement)o1).getWeight() < ((VSMElement)o2).getWeight())
+        /*if(((VSMElement)o1).getWeight() < ((VSMElement)o2).getWeight())
          return 1;
        else
              if(((VSMElement)o1).getWeight() == ((VSMElement)o2).getWeight())
                return 0;
              else
-               return -1;
+               return -1;*/
+    	
+    	
+    	// NOTE: o1 and o2 inverted because we want by decreasing order
+    	return Double.compare(((VSMElement)o2).getWeight(),((VSMElement)o1).getWeight());
     }
 }

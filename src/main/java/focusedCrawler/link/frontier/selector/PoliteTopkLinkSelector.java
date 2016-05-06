@@ -62,21 +62,21 @@ public class PoliteTopkLinkSelector implements LinkSelector {
     }
     
     @Override
-    public LinkRelevance[] select(Frontier frontier, int numberOfLinks) {
+    public LinkRelevance[] select(Frontier frontier, int type, int numberOfLinks) {
         
         final long startTime = System.currentTimeMillis();
         
-        LinkRelevance[] result = selectTopk(frontier, numberOfLinks);
+        LinkRelevance[] result = selectTopk(frontier, type, numberOfLinks);
         while(result.length == 0 && this.remainsLinksInFrontier) {
             try {
-                logger.info("No link can be select right now. " +
+                logger.info("No link can be selected right now. " +
                             "Sleeping {}ms before trying again.", minimumAccessInterval);
                 Thread.sleep(minimumAccessInterval);
             } catch (InterruptedException e) {
                 // just give up and return normally
                 break;
             }
-            result = selectTopk(frontier, numberOfLinks);
+            result = selectTopk(frontier, type, numberOfLinks);
         }
         
         final long totalTime = System.currentTimeMillis() - startTime;
@@ -86,7 +86,7 @@ public class PoliteTopkLinkSelector implements LinkSelector {
         return result;
     }
 
-    private LinkRelevance[] selectTopk(Frontier frontier, int numberOfLinks) {
+    private LinkRelevance[] selectTopk(Frontier frontier, int type, int numberOfLinks) {
         
         PersistentHashtable<LinkRelevance> urlRelevance = frontier.getUrlRelevanceHashtable();
         List<Tuple<LinkRelevance>> tuples = urlRelevance.getTable();
@@ -98,8 +98,8 @@ public class PoliteTopkLinkSelector implements LinkSelector {
             
             LinkRelevance linkRelevance = tuple.getValue();
             
-            double relevance = linkRelevance.getRelevance();
-            if(relevance > 0) {
+            Double relevance = tuple.getValue().getRelevance(type);
+            if(relevance != null && relevance > 0) {
                 
                 this.remainsLinksInFrontier = true;
                 

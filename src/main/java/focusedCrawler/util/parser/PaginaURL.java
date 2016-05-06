@@ -48,6 +48,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.target.model.Page;
 import focusedCrawler.util.string.Acentos;
 import focusedCrawler.util.string.StopList;
@@ -92,8 +93,8 @@ public class PaginaURL {
     private int                forms = 0;
     private int                images = 0;
 
-    private transient Vector   texto = new Vector();
-    private transient Vector   textoMeta = new Vector();
+    private transient Vector<String>   texto = new Vector<String>();
+    private transient Vector<String>   textoMeta = new Vector<String>();
     private URL[]              URLabsolutas = null;
     private Vector             links = new Vector();
     private Vector             mailList =
@@ -756,44 +757,46 @@ public class PaginaURL {
 
     private boolean filterURL = false;
 
-    private Vector around = new Vector();
-    private Vector linkNeigh = new Vector();
+    private Vector<String> around = new Vector<String>();
+    private Vector<LinkMetadata> linkNeigh = new Vector<LinkMetadata>();
 
     public void setFilterWorsOfURLs(boolean filterURL){
       this.filterURL = filterURL;
     }
-
-    public LinkNeighborhood[] getLinkNeighboor(){
-      HashSet<String> unique = new HashSet<String>();
-      Vector<LinkNeighborhood> tempLN = new Vector<LinkNeighborhood>();
-      for (int i = 0; i < linkNeigh.size(); i++) {
-        LinkNeighborhood ln = (LinkNeighborhood)linkNeigh.elementAt(i);
-        String id = ln.getAnchorString() + ln.getLink().toString()+ln.getAroundString();
-        if(!unique.contains(id)){
-        	unique.add(id);
-            int pointer = ln.getAroundPosition();
-            Vector aroundTemp = new Vector();
-            for (int j = pointer - (10 + ln.getNumWordsAnchor()); j < pointer + 10; j++) {
-              if(j >=0 && j <around.size() && (j < pointer - ln.getNumWordsAnchor() || j > pointer-1)){
-                aroundTemp.add(((String)around.elementAt(j)).toLowerCase());
-              }
-            }
-            String[] around = new String[aroundTemp.size()];
-            aroundTemp.toArray(around);
-            ln.setAround(around);
-            if(getURL().getHost().equals(ln.getLink().getHost())){
-            	ln.setSameSite(true);
-            }
-            tempLN.add(ln);
-        }
-      }
-      LinkNeighborhood[] lns = new LinkNeighborhood[tempLN.size()];
-      tempLN.toArray(lns);
-      return lns;
-    }
-
     
-    private Vector  imagens = new Vector();
+    
+    // Returns LMs of the links contained in the page
+    public LinkMetadata[] getLinkMetadatas(){
+        HashSet<String> unique = new HashSet<String>();
+        Vector<LinkMetadata> tempLM = new Vector<LinkMetadata>();
+        for (int i = 0; i < linkNeigh.size(); i++) {
+        	LinkMetadata lm = (LinkMetadata)linkNeigh.elementAt(i);
+          String id = lm.getAnchor() + lm.getUrl()+lm.getAround();
+          if(!unique.contains(id)){
+          	unique.add(id);
+              int pointer = lm.getAroundPosition();
+              Vector<String> aroundTemp = new Vector<String>();
+              for (int j = pointer - (10 + lm.getNumWordsAnchor()); j < pointer + 10; j++) {
+                if(j >=0 && j <around.size() && (j < pointer - lm.getNumWordsAnchor() || j > pointer-1)){
+                  aroundTemp.add(((String)around.elementAt(j)).toLowerCase());
+                }
+              }
+              String[] around = new String[aroundTemp.size()];
+              aroundTemp.toArray(around);
+              lm.setAround(around);
+              if(getURL().getHost().equals(lm.getLink().getHost())){
+              	lm.setSameSite(true);
+              }
+              tempLM.add(lm);
+          }
+        }
+        LinkMetadata[] lms = new LinkMetadata[tempLM.size()];
+        tempLM.toArray(lms);
+        return lms;
+      }
+    
+
+    private Vector<String>  imagens = new Vector<String>();
     
     protected void separadorTextoCodigo(String arquivo) {    // arquivo equivale ao codigo HTML da pagina
         if(codes.size() == 0){
@@ -867,7 +870,7 @@ public class PaginaURL {
         char    quote_char = '\0';
         URL     base = pagina;    // pagina = URL da pagina atual...
 
-        Vector  frames = new Vector();
+        Vector<String>  frames = new Vector<String>();
         char    c = '\0';
         char    ant1 = '\0';
         char    ant2 = '\0';
@@ -877,7 +880,7 @@ public class PaginaURL {
         String anchor = "";
         int numOfwordsAnchor = 0;
 
-        LinkNeighborhood ln = null;
+        LinkMetadata lm = null;
         String  tagName = "";
         String lastTag = "";
         String  atributo = "";
@@ -1269,9 +1272,9 @@ public class PaginaURL {
                         if((tag_tipo_fim && tagName.equals("a")) || tagName.equals("area")){
 
                           insideATag = false;
-                          if(ln!=null){
-                            Vector anchorTemp = new Vector();
-                            //System.out.println("URL---"+ln.getLink());
+                          if(lm!=null){
+                            Vector<String> anchorTemp = new Vector<String>();
+                            //System.out.println("URL---"+lm.getLink());
                             //System.out.println("ANC---"+anchor);
                             StringTokenizer tokenizer = new StringTokenizer(anchor," ");
                             while(tokenizer.hasMoreTokens()){
@@ -1279,12 +1282,12 @@ public class PaginaURL {
                             }
                             String[] anchorArray = new String[anchorTemp.size()];
                             anchorTemp.toArray(anchorArray);
-                            ln.setAnchor(anchorArray);
-                            ln.setAroundPosition(around.size());
-                            ln.setNumberOfWordsAnchor(numOfwordsAnchor);
-                            linkNeigh.add(ln.clone());
+                            lm.setAnchor(anchorArray);
+                            lm.setAroundPosition(around.size());
+                            lm.setNumberOfWordsAnchor(numOfwordsAnchor);
+                            linkNeigh.add(lm.clone());
 //                            anchor = "";
-                            ln = null;
+                            lm = null;
                           }
                           anchor = "";
                         }
@@ -1578,23 +1581,23 @@ public class PaginaURL {
                                   String urlTemp = adicionaLink(str, base);
                                   //System.out.println("----URL:"+urlTemp);
                                   if(urlTemp!= null && urlTemp.startsWith("http")){
-                                	  if(ln!=null){
-                                		  Vector anchorTemp = new Vector();
+                                	  if(lm!=null){
+                                		  Vector<String> anchorTemp = new Vector<String>();
                                 		  StringTokenizer tokenizer = new StringTokenizer(anchor," ");
                                 		  while(tokenizer.hasMoreTokens()){
                                 			  anchorTemp.add(tokenizer.nextToken());
                                 		  }
                                 		  String[] anchorArray = new String[anchorTemp.size()];
                                 		  anchorTemp.toArray(anchorArray);
-                                		  ln.setAnchor(anchorArray);
-                                		  ln.setAroundPosition(around.size());
-                                		  ln.setNumberOfWordsAnchor(numOfwordsAnchor);
-                                		  linkNeigh.add(ln.clone());
+                                		  lm.setAnchor(anchorArray);
+                                		  lm.setAroundPosition(around.size());
+                                		  lm.setNumberOfWordsAnchor(numOfwordsAnchor);
+                                		  linkNeigh.add(lm.clone());
                                 		  anchor = "";
-                                		  ln = null;
+                                		  lm = null;
                                 	  }
                                 	  try {
-                                	  ln = new LinkNeighborhood(new URL(urlTemp));
+                                	  lm = new LinkMetadata(new URL(urlTemp));
                                 	  } catch (Exception e) {
                                 	      // Ignoring Exception on purpose since the URL in page is not proper
                                 	  }
@@ -1604,7 +1607,7 @@ public class PaginaURL {
                                        && atributo.equals("href")) {
                                 String urlTemp = adicionaLink(str, base);
                                 if(urlTemp!= null && urlTemp.startsWith("http")){
-                                  ln = new LinkNeighborhood(new URL(urlTemp));
+                                  lm = new LinkMetadata(new URL(urlTemp));
                                 }
 //                                System.out.println("CREATE LINK:"  + urlTemp);
                             } else if (tagName.equals("area")
@@ -1612,12 +1615,12 @@ public class PaginaURL {
                                 adicionaLink(str, base);
                                 String urlTemp = adicionaLink(str, base);
                                 if(urlTemp!= null && urlTemp.startsWith("http")){
-                                  ln = new LinkNeighborhood(new URL(urlTemp));
+                                  lm = new LinkMetadata(new URL(urlTemp));
                                 }
                             } else if (tagName.equals("img")
                                        && atributo.equals("src")) {
-                            	if(ln != null){
-                            		ln.setImgSource(str);
+                            	if(lm != null){
+                            		lm.setImgSource(str);
                             	}
                             	try {
                             		imagens.addElement(parseLink(base,str).toString());	
@@ -1681,12 +1684,12 @@ public class PaginaURL {
                                         posicao_da_palavra++;
                                     }
                                 }
-                                if(ln != null){
-                                	String[] current = ln.getImgAlt();
+                                if(lm != null){
+                                	String[] current = lm.getImgAlt();
                                 	if(current == null){
                                     	String[] terms = new String[altWords.size()];
                                     	altWords.toArray(terms);
-                                    	ln.setImgAlt(terms);
+                                    	lm.setImgAlt(terms);
                                 	}else{
                                 		String[] terms = new String[altWords.size()+current.length];
                                 		int indexTerms = 0;
@@ -1696,7 +1699,7 @@ public class PaginaURL {
                                 		for (int i = 0; i < altWords.size(); i++,indexTerms++) {
                                 			terms[indexTerms] = altWords.elementAt(i);
 										}
-                                		ln.setImgAlt(terms);
+                                		lm.setImgAlt(terms);
                                 	}
                                 }
                             } else if (tagName.equals("meta")
@@ -3293,7 +3296,7 @@ public class PaginaURL {
 //
 //            Vector<HACCluster> vLinks = new Vector<HACCluster>();
 //            HashSet<String> uniqueURLs = new HashSet<String>();
-            LinkNeighborhood[] ln =  p.getLinkNeighboor();
+            LinkMetadata[] ln =  p.getLinkMetadatas();
             System.out.println("SIZE:" + ln.length);
             for (int i = 0; i < ln.length; i++) {
             	System.out.println("URL:" + ln[i].getLink().toString());

@@ -43,6 +43,7 @@ public class FilterData {
 
 	public Vector<WordFrequency> filter(Vector<WordFrequency> sortList, Vector<WordFrequency> aroundWords){
 
+		//System.out.println("SIZE OF sortList" + sortList.size());
 		boolean stem = aroundWords != null;
 		Vector<WordFrequency> filteredWords = new Vector<>();
 		int minFreq = 5;

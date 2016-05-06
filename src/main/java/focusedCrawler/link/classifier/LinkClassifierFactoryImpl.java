@@ -112,7 +112,7 @@ public class LinkClassifierFactoryImpl implements LinkClassifierFactory {
 		  linkClassifier = new LinkClassifierAuthority();
 	  }
 	  if(className.indexOf("LinkClassifierImpl") != -1){
-    	  LNClassifier lnClassifier = LNClassifier.create(featureFilePath, modelFilePath, stoplist);
+    	  LMClassifier lnClassifier = LMClassifier.create(featureFilePath, modelFilePath, stoplist);
     	  linkClassifier = new LinkClassifierImpl(lnClassifier);  
       }
 	  if(className.indexOf("MaxDepthLinkClassifier") != -1){
@@ -143,7 +143,7 @@ public class LinkClassifierFactoryImpl implements LinkClassifierFactory {
 	  Instances insts = new Instances("link_classification", vectorAtt, 1);
 	  insts.setClassIndex(attributes.length);
 	  if(className.indexOf("LinkClassifierImpl") != -1){
-		  LNClassifier lnClassifier = new LNClassifier(classifier, insts, wrapper, attributes);
+		  LMClassifier lnClassifier = new LMClassifier(classifier, insts, wrapper, attributes);
 		  linkClassifier = new LinkClassifierImpl(lnClassifier);
 	  }
 	  if(className.indexOf("LinkClassifierAuthority") != -1){

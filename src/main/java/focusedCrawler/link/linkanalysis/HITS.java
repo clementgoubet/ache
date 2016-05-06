@@ -10,8 +10,7 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import focusedCrawler.link.BipartiteGraphRepository;
-import focusedCrawler.util.parser.BackLinkNeighborhood;
-import focusedCrawler.util.parser.LinkNeighborhood;
+import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.util.persistence.Tuple;
 import focusedCrawler.util.vsm.VSMElement;
 import focusedCrawler.util.vsm.VSMElementComparator;
@@ -63,8 +62,8 @@ public class HITS {
 	}
 
 	public void originalHITS() throws Exception{
-		Tuple<String>[] authTuples = graphRep.getAuthGraph();
-		Tuple<String>[] hubTuples = graphRep.getHubGraph();
+		Tuple<String>[] authTuples = graphRep.getParentsGraph();
+		Tuple<String>[] hubTuples = graphRep.getChildrenGraph();
 //		Tuple[] authTuples = new Tuple[7];
 //		Tuple t1 = new Tuple("D", "A###");
 //		Tuple t2 = new Tuple("E", "A###");
@@ -222,18 +221,18 @@ public class HITS {
 		Iterator<String> values = relSites.iterator();
 		while(values.hasNext()){
 			String site = values.next();
-			BackLinkNeighborhood[] backlinks = graphRep.getBacklinks(new URL(site));
+			LinkMetadata[] backlinks = graphRep.getBacklinksLM(new URL(site));
 			if(backlinks == null){
 				continue;
 			}
 			for (int j = 0; j < backlinks.length; j++) {
 				VSMElement count = hubValues.get(backlinks[j].getLink());
 				if(count == null){
-					count = new VSMElement(backlinks[j].getLink(), 0);
+					count = new VSMElement(backlinks[j].getUrl(), 0);
 				}
 				count.setWeight(count.getWeight()+1);
-				hubValues.put(backlinks[j].getLink(), count);
-				LinkNeighborhood[] outlinks = graphRep.getOutlinks(new URL(backlinks[j].getLink()));
+				hubValues.put(backlinks[j].getUrl(), count);
+				LinkMetadata[] outlinks = graphRep.getOutlinksLM(new URL(backlinks[j].getUrl()));
 				for (int i = 0; i < outlinks.length; i++) {
 					if(outlinks[i] == null){
 						continue;

@@ -24,24 +24,24 @@ public class PoliteTopkLinkSelectorTest {
         
         Frontier frontier = new Frontier(tempFolder.newFolder().toString(), 100);
         
-        frontier.insert(new LinkRelevance("http://asdf/1", 201));
-        frontier.insert(new LinkRelevance("http://asdf/2", 202));
-        frontier.insert(new LinkRelevance("http://asdf/3", 203));
-        frontier.insert(new LinkRelevance("http://asdf/4", 204));
+        frontier.insert(new LinkRelevance("http://asdf/1", LinkRelevance.DEFAULT_TYPE, 201));
+        frontier.insert(new LinkRelevance("http://asdf/2", LinkRelevance.DEFAULT_TYPE, 202));
+        frontier.insert(new LinkRelevance("http://asdf/3", LinkRelevance.DEFAULT_TYPE, 203));
+        frontier.insert(new LinkRelevance("http://asdf/4", LinkRelevance.DEFAULT_TYPE, 204));
         
-        frontier.insert(new LinkRelevance("http://qwer/1", 101));
-        frontier.insert(new LinkRelevance("http://qwer/2", 102));
-        frontier.insert(new LinkRelevance("http://qwer/3", 103));
-        frontier.insert(new LinkRelevance("http://qwer/4", 104));
+        frontier.insert(new LinkRelevance("http://qwer/1", LinkRelevance.DEFAULT_TYPE, 101));
+        frontier.insert(new LinkRelevance("http://qwer/2", LinkRelevance.DEFAULT_TYPE, 102));
+        frontier.insert(new LinkRelevance("http://qwer/3", LinkRelevance.DEFAULT_TYPE, 103));
+        frontier.insert(new LinkRelevance("http://qwer/4", LinkRelevance.DEFAULT_TYPE, 104));
         
-        frontier.insert(new LinkRelevance("http://zxcv/1", 1));
-        frontier.insert(new LinkRelevance("http://zxcv/2", 2));
-        frontier.insert(new LinkRelevance("http://zxcv/3", 3));
-        frontier.insert(new LinkRelevance("http://zxcv/4", 4));
+        frontier.insert(new LinkRelevance("http://zxcv/1", LinkRelevance.DEFAULT_TYPE, 1));
+        frontier.insert(new LinkRelevance("http://zxcv/2", LinkRelevance.DEFAULT_TYPE, 2));
+        frontier.insert(new LinkRelevance("http://zxcv/3", LinkRelevance.DEFAULT_TYPE, 3));
+        frontier.insert(new LinkRelevance("http://zxcv/4", LinkRelevance.DEFAULT_TYPE, 4));
         frontier.commit();
         
         // when
-        LinkRelevance[] links = selector.select(frontier, 5);
+        LinkRelevance[] links = selector.select(frontier, LinkRelevance.DEFAULT_TYPE, 5);
 
         // then
         assertThat(links, is(notNullValue()));
@@ -69,21 +69,21 @@ public class PoliteTopkLinkSelectorTest {
         PoliteTopkLinkSelector selector = new PoliteTopkLinkSelector(maxUrlPerDomain, minimumAccessTimeInterval); 
         
         Frontier frontier = new Frontier(tempFolder.newFolder().toString(), 100);
-        frontier.insert(new LinkRelevance("http://asdf/1", 201));
-        frontier.insert(new LinkRelevance("http://qwer/1", 101));
+        frontier.insert(new LinkRelevance("http://asdf/1", LinkRelevance.DEFAULT_TYPE, 201));
+        frontier.insert(new LinkRelevance("http://qwer/1", LinkRelevance.DEFAULT_TYPE, 101));
         frontier.commit();
         
         LinkRelevance[] links = null;
         
         // when
         long timeBeforeFirstSelect = System.currentTimeMillis();
-        links = selector.select(frontier, 2);
+        links = selector.select(frontier, LinkRelevance.DEFAULT_TYPE, 2);
         // then
         assertThat(links, is(notNullValue()));
         assertThat(links.length, is(2));
         
         // when
-        links = selector.select(frontier, 2);
+        links = selector.select(frontier, LinkRelevance.DEFAULT_TYPE, 2);
         long timeLastSelect = System.currentTimeMillis();
 
         // then

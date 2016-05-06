@@ -20,14 +20,14 @@ public class TopkLinkSelectorTest {
         // given
         TopkLinkSelector selector = new TopkLinkSelector();
         Frontier frontier = new Frontier(tempFolder.newFolder().toString(), 100);
-        frontier.insert(new LinkRelevance("http://localhost/001", 1));
-        frontier.insert(new LinkRelevance("http://localhost/099", 99));
-        frontier.insert(new LinkRelevance("http://localhost/199", 199));
-        frontier.insert(new LinkRelevance("http://localhost/299", 299));
+        frontier.insert(new LinkRelevance("http://localhost/001", LinkRelevance.DEFAULT_TYPE, 1));
+        frontier.insert(new LinkRelevance("http://localhost/099", LinkRelevance.DEFAULT_TYPE, 99));
+        frontier.insert(new LinkRelevance("http://localhost/199", LinkRelevance.DEFAULT_TYPE, 199));
+        frontier.insert(new LinkRelevance("http://localhost/299", LinkRelevance.DEFAULT_TYPE, 299));
         frontier.commit();
         
         // when
-        LinkRelevance[] links = selector.select(frontier, 2);
+        LinkRelevance[] links = selector.select(frontier, LinkRelevance.DEFAULT_TYPE, 2);
         
         // then
         assertThat(links, is(notNullValue()));
@@ -41,14 +41,14 @@ public class TopkLinkSelectorTest {
         // given
         TopkLinkSelector selector = new TopkLinkSelector();
         Frontier frontier = new Frontier(tempFolder.newFolder().toString(), 100);
-        frontier.insert(new LinkRelevance("http://localhost/001", -1));
-        frontier.insert(new LinkRelevance("http://localhost/099", 99));
-        frontier.insert(new LinkRelevance("http://localhost/199", -199));
-        frontier.insert(new LinkRelevance("http://localhost/299", -299));
+        frontier.insert(new LinkRelevance("http://localhost/001", LinkRelevance.DEFAULT_TYPE, -1));
+        frontier.insert(new LinkRelevance("http://localhost/099", LinkRelevance.DEFAULT_TYPE, 99));
+        frontier.insert(new LinkRelevance("http://localhost/199", LinkRelevance.DEFAULT_TYPE, -199));
+        frontier.insert(new LinkRelevance("http://localhost/299", LinkRelevance.DEFAULT_TYPE, -299));
         frontier.commit();
         
         // when
-        LinkRelevance[] links = selector.select(frontier, 2);
+        LinkRelevance[] links = selector.select(frontier, LinkRelevance.DEFAULT_TYPE, 2);
         
         // then
         assertThat(links, is(notNullValue()));

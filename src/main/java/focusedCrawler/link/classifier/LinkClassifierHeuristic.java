@@ -23,17 +23,17 @@
 */
 package focusedCrawler.link.classifier;
 
-import focusedCrawler.link.classifier.builder.Instance;
-import focusedCrawler.link.classifier.builder.LinkNeighborhoodWrapper;
-import focusedCrawler.link.frontier.LinkRelevance;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
+
+import focusedCrawler.link.LinkMetadata;
+import focusedCrawler.link.classifier.builder.Instance;
+import focusedCrawler.link.classifier.builder.LinkNeighborhoodWrapper;
+import focusedCrawler.link.frontier.LinkRelevance;
 import focusedCrawler.util.parser.PaginaURL;
-import focusedCrawler.util.parser.LinkNeighborhood;
 
 /**
  *
@@ -71,8 +71,10 @@ public class LinkClassifierHeuristic implements LinkClassifier{
    * @return LinkRelevance[]
    */
 
-  public LinkRelevance[] classify(PaginaURL page) throws LinkClassifierException {
-
+  public LinkRelevance[] classify(PaginaURL page, int type) throws LinkClassifierException {
+		if(type == LinkRelevance.TYPE_BACKLINK_BACKWARD){
+			throw new IllegalArgumentException("This classifier is not suited for TYPE_BACKLINK_BACKWARD (classifying whether a page URL is worth backlinking)");
+		}
     LinkRelevance[] linkRelevance = null;
     try{
       Map<String, Instance> urlWords = wrapper.extractLinks(page, attributes);
@@ -125,7 +127,7 @@ public class LinkClassifierHeuristic implements LinkClassifier{
               }
           }
 //        }
-        linkRelevance[count] = new LinkRelevance(new URL(urlStr),resultClassification);
+        linkRelevance[count] = new LinkRelevance(new URL(urlStr), type, resultClassification);
         count++;
       }
     }
@@ -139,10 +141,13 @@ public class LinkClassifierHeuristic implements LinkClassifier{
     return linkRelevance;
   }
 
-  public LinkRelevance classify(LinkNeighborhood ln) throws LinkClassifierException{
+  public LinkRelevance classify(LinkMetadata lm, int type) throws LinkClassifierException{
     return null;
   }
 
+	public LinkRelevance[] classify(LinkMetadata[] lms, int type) throws LinkClassifierException{
+		return null;
+	}
 
 }
 

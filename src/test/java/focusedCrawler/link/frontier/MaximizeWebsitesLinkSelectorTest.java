@@ -24,11 +24,11 @@ public class MaximizeWebsitesLinkSelectorTest {
         MaximizeWebsitesLinkSelector selector = new MaximizeWebsitesLinkSelector();
         Frontier frontier = new Frontier(tempFolder.newFolder().toString(), 100);
         
-        frontier.insert(new LinkRelevance("http://example1.com/1", 1));
-        frontier.insert(new LinkRelevance("http://example1.com/2", 2));
+        frontier.insert(new LinkRelevance("http://example1.com/1", LinkRelevance.DEFAULT_TYPE, 1));
+        frontier.insert(new LinkRelevance("http://example1.com/2", LinkRelevance.DEFAULT_TYPE, 2));
         
-        frontier.insert(new LinkRelevance("http://example2.com/1", 4));
-        frontier.insert(new LinkRelevance("http://example2.com/2", 5));
+        frontier.insert(new LinkRelevance("http://example2.com/1", LinkRelevance.DEFAULT_TYPE, 4));
+        frontier.insert(new LinkRelevance("http://example2.com/2", LinkRelevance.DEFAULT_TYPE, 5));
         
         frontier.commit();
         
@@ -40,21 +40,21 @@ public class MaximizeWebsitesLinkSelectorTest {
         );
         
         // when
-        LinkRelevance[] links = selector.select(frontier, 2);
+        LinkRelevance[] links = selector.select(frontier, 1, 2);
         removeAll(frontier, links);
         // then
         assertThat(links.length, is(2));
         assertThat(containsAll(links, domainsSet), is(true));
         
         // when
-        links = selector.select(frontier, 2);
+        links = selector.select(frontier, 1, 2);
         removeAll(frontier, links);
         // then
         assertThat(links.length, is(2));
         assertThat(containsAll(links, domainsSet), is(true));
         
         // when
-        links = selector.select(frontier, 2);
+        links = selector.select(frontier, 1, 2);
         // then
         assertThat(links.length, is(0));
 
@@ -66,22 +66,22 @@ public class MaximizeWebsitesLinkSelectorTest {
         MaximizeWebsitesLinkSelector selector = new MaximizeWebsitesLinkSelector();
         Frontier frontier = new Frontier(tempFolder.newFolder().toString(), 100);
         
-        frontier.insert(new LinkRelevance("http://example1.com/1", 1));
-        frontier.insert(new LinkRelevance("http://example1.com/2", 2));
-        frontier.insert(new LinkRelevance("http://example1.com/3", 3));
+        frontier.insert(new LinkRelevance("http://example1.com/1", LinkRelevance.DEFAULT_TYPE, 1));
+        frontier.insert(new LinkRelevance("http://example1.com/2", LinkRelevance.DEFAULT_TYPE, 2));
+        frontier.insert(new LinkRelevance("http://example1.com/3", LinkRelevance.DEFAULT_TYPE, 3));
         
-        frontier.insert(new LinkRelevance("http://example2.com/1", 1));
-        frontier.insert(new LinkRelevance("http://example2.com/2", 2));
-        frontier.insert(new LinkRelevance("http://example2.com/3", 3));
+        frontier.insert(new LinkRelevance("http://example2.com/1", LinkRelevance.DEFAULT_TYPE, 1));
+        frontier.insert(new LinkRelevance("http://example2.com/2", LinkRelevance.DEFAULT_TYPE, 2));
+        frontier.insert(new LinkRelevance("http://example2.com/3", LinkRelevance.DEFAULT_TYPE, 3));
         
-        frontier.insert(new LinkRelevance("http://example3.com/1", 1));
-        frontier.insert(new LinkRelevance("http://example3.com/2", 2));
-        frontier.insert(new LinkRelevance("http://example3.com/3", 3));
+        frontier.insert(new LinkRelevance("http://example3.com/1", LinkRelevance.DEFAULT_TYPE, 1));
+        frontier.insert(new LinkRelevance("http://example3.com/2", LinkRelevance.DEFAULT_TYPE, 2));
+        frontier.insert(new LinkRelevance("http://example3.com/3", LinkRelevance.DEFAULT_TYPE, 3));
         
         frontier.commit();
         
         // when
-        LinkRelevance[] links = selector.select(frontier, 15);
+        LinkRelevance[] links = selector.select(frontier, 1, 15);
         
         // then
         assertThat(links.length, is(9));

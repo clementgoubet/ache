@@ -18,12 +18,13 @@ public class MultiLevelLinkSelector implements LinkSelector {
     private static final Logger logger = LoggerFactory.getLogger(MultiLevelLinkSelector.class);
 
 	@Override
-	public LinkRelevance[] select(Frontier frontier, int numberOfLinks) {
+	public LinkRelevance[] select(Frontier frontier, int type, int numberOfLinks) {
 	    
 	    PersistentHashtable<LinkRelevance> urlRelevance = frontier.getUrlRelevanceHashtable();
 
 		LinkRelevance[] result = null;
-		int[] classLimits = new int[]{10000,20000,30000};
+		int fraction = Math.max(numberOfLinks / 6,1);
+		int[] classLimits = new int[]{fraction ,2*fraction,3*fraction};
 		int[] countTopClass = new int[classLimits.length];
 		int[] classCount = new int[classLimits.length];
 		try {
@@ -39,10 +40,9 @@ public class MultiLevelLinkSelector implements LinkSelector {
 				String url = URLDecoder.decode(key, "UTF-8");
 
 				if (url != null){
-
-					Integer relevInt = (int) tuple.getValue().getRelevance();
-					if(relevInt != null){
-						int relev = relevInt.intValue();
+					Double relevance = tuple.getValue().getRelevance(type);
+					if(relevance != null){
+						int relev = relevance.intValue();
 						if(relev > 0){
 							int index = relev/100;
 							if(classCount[index] < classLimits[index]){
@@ -62,13 +62,13 @@ public class MultiLevelLinkSelector implements LinkSelector {
 										countTopClass[0]++;
 									}
 									if(insert){
-										LinkRelevance linkRel = new LinkRelevance(new URL(url),relev);
+										LinkRelevance linkRel = new LinkRelevance(new URL(url),type,relev);
 										tempList.add(linkRel);
 										count++;
 										classCount[index]++;
 									}
 								}else{
-									LinkRelevance linkRel = new LinkRelevance(new URL(url),relev);
+									LinkRelevance linkRel = new LinkRelevance(new URL(url),type,relev);
 									tempList.add(linkRel);
 									count++;
 									classCount[index]++;

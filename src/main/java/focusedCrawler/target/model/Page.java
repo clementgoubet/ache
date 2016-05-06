@@ -28,6 +28,9 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.util.parser.PaginaURL;
 
 /**
@@ -166,6 +169,15 @@ public class Page implements Serializable {
     
     public void setFetchTime(long fetchTime) {
         this.fetchTime = fetchTime;
+    }
+    
+    //Returns LM of the current page
+    @JsonIgnore
+    public LinkMetadata getLinkMetadata(){
+        LinkMetadata lm = new LinkMetadata(url);
+        lm.setPageContent(content);
+        lm.setPageRelevance((int)relevance);
+        return lm;
     }
 
 }

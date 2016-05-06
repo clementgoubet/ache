@@ -4,13 +4,13 @@ import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.Map;
 
+import weka.classifiers.Classifier;
+import weka.core.Instances;
+import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.link.classifier.builder.Instance;
 import focusedCrawler.link.classifier.builder.LinkNeighborhoodWrapper;
 import focusedCrawler.link.frontier.LinkRelevance;
-import focusedCrawler.util.parser.LinkNeighborhood;
 import focusedCrawler.util.parser.PaginaURL;
-import weka.classifiers.Classifier;
-import weka.core.Instances;
 
 /**
  * This class implements the link classifier for the hub links.
@@ -35,13 +35,13 @@ public class LinkClassifierHub implements LinkClassifier{
 		this.attributes = attributes;
 	}
 	
-	public LinkRelevance classify(LinkNeighborhood ln) throws LinkClassifierException {
+	public LinkRelevance classify(LinkMetadata lm, int type) throws LinkClassifierException {
 		LinkRelevance result = null;
 		try {
 			if(classifier == null){
-				result = new LinkRelevance(ln.getLink(),LinkRelevance.DEFAULT_HUB_RELEVANCE+1);				
+				result = new LinkRelevance(lm.getLink(), type, LinkRelevance.DEFAULT_HUB_RELEVANCE+1);				
 			}else{
-				Map<String, Instance> urlWords = wrapper.extractLinks(ln, attributes);
+				Map<String, Instance> urlWords = wrapper.extractLinks(lm, attributes);
 				Iterator<String> iter = urlWords.keySet().iterator();
 				while(iter.hasNext()){
 					String url = (String)iter.next();
@@ -51,7 +51,7 @@ public class LinkClassifierHub implements LinkClassifier{
 			        instanceWeka.setDataset(instances);
 			        double[] prob = classifier.distributionForInstance(instanceWeka);
 			        double relevance = LinkRelevance.DEFAULT_HUB_RELEVANCE + prob[0]*100;
-			        result = new LinkRelevance(ln.getLink(),relevance);
+			        result = new LinkRelevance(lm.getLink(),type,relevance);
 				}
 			}
 
@@ -64,9 +64,13 @@ public class LinkClassifierHub implements LinkClassifier{
 	}
 
 	@Override
-	public LinkRelevance[] classify(PaginaURL page)
+	public LinkRelevance[] classify(PaginaURL page, int type)
 			throws LinkClassifierException {
 		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public LinkRelevance[] classify(LinkMetadata[] lms, int type) throws LinkClassifierException{
 		return null;
 	}
 	

@@ -31,6 +31,7 @@ public class FrontierManagerTest {
     private LinkFilter emptyLinkFilter = new LinkFilter(new ArrayList<String>());
 
     private Frontier frontier;
+    private Frontier backlinkFrontier;
     
     @Before
     public void setUp() throws Exception {
@@ -45,20 +46,21 @@ public class FrontierManagerTest {
     public void shouldNotInsertLinkOutOfScope() throws Exception {
         // given
         
-        LinkRelevance link1 = new LinkRelevance(new URL("http://www.example1.com/index.html"), 1);
-        LinkRelevance link2 = new LinkRelevance(new URL("http://www.example2.com/index.html"), 2);
+        LinkRelevance link1 = new LinkRelevance(new URL("http://www.example1.com/index.html"), LinkRelevance.DEFAULT_TYPE, 1);
+        LinkRelevance link2 = new LinkRelevance(new URL("http://www.example2.com/index.html"), LinkRelevance.DEFAULT_TYPE, 2);
         
         Map<String, Integer> scope = new HashMap<String, Integer>();
         scope.put("www.example1.com", -1);
         
         
         LinkSelector linkSelector = new SiteLinkSelector();
-        Frontier frontier = new Frontier(tempFolder.newFolder().toString(), 1000, scope);
-        FrontierManager frontierManager = new FrontierManager(frontier, 2, 2, linkSelector, new LinkFilter(new ArrayList<String>()));
+        frontier = new Frontier(tempFolder.newFolder().toString(), 1000, scope);
+        backlinkFrontier = new Frontier(tempFolder.newFolder().toString(), 1000, scope);
+        FrontierManager frontierManager = new FrontierManager(frontier, backlinkFrontier, 2, 2, linkSelector, null, null, new LinkFilter(new ArrayList<String>()));
         
         // when
-        frontierManager.insert(link1);
-        frontierManager.insert(link2);
+        frontierManager.insert(link1,1);
+        frontierManager.insert(link2,1);
         
         LinkRelevance selectedLink1 = frontierManager.nextURL();
         LinkRelevance selectedLink2 = frontierManager.nextURL();
@@ -78,12 +80,14 @@ public class FrontierManagerTest {
     public void shouldInsertUrl() throws Exception {
         // given
         LinkSelector linkSelector = new NonRandomLinkSelector();
-        FrontierManager frontierManager = new FrontierManager(frontier, 2, 2, linkSelector, emptyLinkFilter);
+        frontier = new Frontier(tempFolder.newFolder().toString(), 1000);
+        backlinkFrontier = new Frontier(tempFolder.newFolder().toString(), 1000);
+        FrontierManager frontierManager = new FrontierManager(frontier, backlinkFrontier, 2, 2, linkSelector, null, null, emptyLinkFilter);
         
-        LinkRelevance link1 = new LinkRelevance(new URL("http://www.example1.com/index.html"), 1);
+        LinkRelevance link1 = new LinkRelevance(new URL("http://www.example1.com/index.html"), LinkRelevance.DEFAULT_TYPE, 1);
         
         // when
-        frontierManager.insert(link1);
+        frontierManager.insert(link1,1);
         
         LinkRelevance nextURL = frontierManager.nextURL();
         
@@ -100,16 +104,21 @@ public class FrontierManagerTest {
     public void shouldInsertUrlsAndSelectUrlsInSortedByRelevance() throws Exception {
         // given
         LinkSelector linkSelector = new NonRandomLinkSelector();
-        FrontierManager frontierManager = new FrontierManager(frontier, 2, 2, linkSelector, emptyLinkFilter);
+        frontier = new Frontier(tempFolder.newFolder().toString(), 1000);
+        backlinkFrontier = new Frontier(tempFolder.newFolder().toString(), 1000);
+        FrontierManager frontierManager = new FrontierManager(frontier, backlinkFrontier, 2, 2, linkSelector, null, null, emptyLinkFilter);
         
-        LinkRelevance link1 = new LinkRelevance(new URL("http://www.example1.com/index.html"), 1);
-        LinkRelevance link2 = new LinkRelevance(new URL("http://www.example2.com/index.html"), 2);
-        LinkRelevance link3 = new LinkRelevance(new URL("http://www.example3.com/index.html"), 3);
+        LinkRelevance link1 = new LinkRelevance(new URL("http://www.example1.com/index.html"), LinkRelevance.DEFAULT_TYPE, 1);
+        LinkRelevance link2 = new LinkRelevance(new URL("http://www.example2.com/index.html"), LinkRelevance.DEFAULT_TYPE, 2);
+        LinkRelevance link3 = new LinkRelevance(new URL("http://www.example3.com/index.html"), LinkRelevance.DEFAULT_TYPE, 3);
         
         // when
-        frontierManager.insert(link1);
-        frontierManager.insert(link2);
-        frontierManager.insert(link3);
+        frontierManager.insert(link1,1);
+        System.out.println(frontierManager.getLinkFrontier().unvisited(1));
+        frontierManager.insert(link2,1);
+        System.out.println(frontierManager.getLinkFrontier().unvisited(1));
+        frontierManager.insert(link3,1);
+        System.out.println(frontierManager.getLinkFrontier().unvisited(1));
         
         LinkRelevance selectedLink1 = frontierManager.nextURL();
         LinkRelevance selectedLink2 = frontierManager.nextURL();
@@ -137,20 +146,22 @@ public class FrontierManagerTest {
     public void shouldNotReturnAgainALinkThatWasAlreadyReturned() throws Exception {
         // given
         LinkSelector linkSelector = new NonRandomLinkSelector();
-        FrontierManager frontierManager = new FrontierManager(frontier, 2, 2, linkSelector, emptyLinkFilter);
+        frontier = new Frontier(tempFolder.newFolder().toString(), 1000);
+        backlinkFrontier = new Frontier(tempFolder.newFolder().toString(), 1000);
+        FrontierManager frontierManager = new FrontierManager(frontier, backlinkFrontier, 2, 2, linkSelector, null, null, emptyLinkFilter);
         
-        LinkRelevance link1 = new LinkRelevance(new URL("http://www.example1.com/index.html"), 1);
-        LinkRelevance link2 = new LinkRelevance(new URL("http://www.example2.com/index.html"), 2);
+        LinkRelevance link1 = new LinkRelevance(new URL("http://www.example1.com/index.html"), LinkRelevance.DEFAULT_TYPE, 1);
+        LinkRelevance link2 = new LinkRelevance(new URL("http://www.example2.com/index.html"), LinkRelevance.DEFAULT_TYPE, 2);
         
         // when
-        frontierManager.insert(link1);
-        frontierManager.insert(link2);
+        frontierManager.insert(link1,1);
+        frontierManager.insert(link2,1);
         LinkRelevance selectedLink1 = frontierManager.nextURL();
         LinkRelevance selectedLink2 = frontierManager.nextURL();
         
         LinkRelevance selectedLink3 = frontierManager.nextURL();
         
-        frontierManager.insert(link1); // insert link 1 again, should not be returned
+        frontierManager.insert(link1,1); // insert link 1 again, should not be returned
         LinkRelevance selectedLink4 = frontierManager.nextURL();
         
         // then

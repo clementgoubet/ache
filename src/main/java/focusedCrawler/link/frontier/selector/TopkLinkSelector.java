@@ -12,7 +12,7 @@ import focusedCrawler.util.persistence.Tuple;
 public class TopkLinkSelector implements LinkSelector {
     
     @Override
-    public LinkRelevance[] select(Frontier frontier, int numberOfLinks)  {
+    public LinkRelevance[] select(Frontier frontier, int type, int numberOfLinks)  {
         
         PersistentHashtable<LinkRelevance> urlRelevance = frontier.getUrlRelevanceHashtable();
         Iterator<Tuple<LinkRelevance>> urls = urlRelevance.getTable().iterator();
@@ -24,7 +24,8 @@ public class TopkLinkSelector implements LinkSelector {
         
         while(urls.hasNext()) {
             LinkRelevance linkRelevance = urls.next().getValue();
-            if(linkRelevance.getRelevance() > 0) {
+			Double relevance = linkRelevance.getRelevance(type);
+    		if(relevance != null && relevance > 0) {
                 topkLinks.add(linkRelevance);
             }
         }

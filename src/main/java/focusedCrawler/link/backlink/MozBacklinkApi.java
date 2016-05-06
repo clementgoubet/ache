@@ -12,8 +12,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.target.model.Page;
-import focusedCrawler.util.parser.BackLinkNeighborhood;
 
 public class MozBacklinkApi implements BacklinkApi {
 
@@ -32,7 +32,7 @@ public class MozBacklinkApi implements BacklinkApi {
         this.authStr = auth.getAuthenticationStr();
     }
 
-    public BackLinkNeighborhood[] downloadBacklinks(String host) throws IOException {
+    public LinkMetadata[] downloadBacklinks(String host) throws IOException {
 
         String backlink = "http://lsapi.seomoz.com/linkscape/links/" + host + queryStr + authStr;
 
@@ -41,28 +41,29 @@ public class MozBacklinkApi implements BacklinkApi {
             return null;
         }
 
-        BackLinkNeighborhood[] backlinks = parseResponse(page.getContent());
+        LinkMetadata[] backlinks = parseResponse(page.getContent());
         
         return backlinks;
     }
 
-    private BackLinkNeighborhood[] parseResponse(String content) throws IOException, JsonProcessingException {
+    private LinkMetadata[] parseResponse(String content) throws IOException, JsonProcessingException {
         
         JsonNode root = jsonMapper.readTree(content);
         Iterator<JsonNode> childIterator = root.elements();
         
         int resultSize = root.size();
 
-        BackLinkNeighborhood[] backlinks = new BackLinkNeighborhood[resultSize];
+        LinkMetadata[] backlinks = new LinkMetadata[resultSize];
         for (int i = 0; i < resultSize; i++) {
             JsonNode jsonNode = childIterator.next();
         
             String link = jsonNode.get("uu").asText();
             String title = jsonNode.get("ut").asText();
 
-            backlinks[i] = new BackLinkNeighborhood();
-            backlinks[i].setLink("http://" + link);
-            backlinks[i].setTitle(title);
+            backlinks[i] = new LinkMetadata();
+            backlinks[i].addBacklinkUrl("http://" + link);
+            backlinks[i].addBacklinkTitle(title);
+            backlinks[i].addBacklinkSnippet("");
         }
 
         return backlinks;

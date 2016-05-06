@@ -16,13 +16,14 @@ import focusedCrawler.link.frontier.Frontier;
 import focusedCrawler.link.frontier.LinkRelevance;
 import focusedCrawler.link.linkanalysis.HITS;
 import focusedCrawler.link.linkanalysis.SALSA;
-import focusedCrawler.util.parser.LinkNeighborhood;
 import focusedCrawler.util.vsm.VSMElement;
 
 
 public class OnlineLearning {
 
-	private Frontier frontier;
+	private Frontier linkFrontier;
+
+	private Frontier backlinkFrontier;
 	
 	private BipartiteGraphManager manager;
 	
@@ -34,8 +35,9 @@ public class OnlineLearning {
 	
 	private String targetPath;
 	
-	public OnlineLearning(Frontier frontier, BipartiteGraphManager manager, LinkClassifierBuilder classifierBuilder, String method, String path){
-		this.frontier = frontier;
+	public OnlineLearning(Frontier linkFrontier, Frontier backlinkFrontier, BipartiteGraphManager manager, LinkClassifierBuilder classifierBuilder, String method, String path){
+		this.linkFrontier = linkFrontier;
+		this.backlinkFrontier = backlinkFrontier;
 		this.manager = manager;
 		this.classifierBuilder = classifierBuilder;
 		this.method = method;
@@ -44,7 +46,9 @@ public class OnlineLearning {
 	}
 	
 	public void execute() throws Exception{
-		frontier.commit();
+		linkFrontier.commit();
+		backlinkFrontier.commit();
+		System.out.println("COMMIT DONE");
 		if(method.equals("SALSA")){
 			runSALSA(null,false);
 		}
@@ -70,7 +74,8 @@ public class OnlineLearning {
 			forwardClassifier(loadRelSites(true),true,3);
 		}
 
-		frontier.commit();		
+		linkFrontier.commit();
+		backlinkFrontier.commit();
 	}
 	
 	private HashSet<String> loadRelSites(boolean isDir) throws IOException{
@@ -122,7 +127,7 @@ public class OnlineLearning {
 						continue;
 					}
 					probs.put(id + "_auth", new VSMElement(id,1));
-					String[] backlinks = rep.getBacklinks(id);
+					String[] backlinks = rep.getBacklinkIDs(id);
 					for (int i = 0; i < backlinks.length; i++) {
 						VSMElement elem = probs.get(id + "_hub");
 						if(elem == null){
@@ -140,36 +145,34 @@ public class OnlineLearning {
 		VSMElement[] hubRelevance = salsa.getHubValues();
 		double rel = 199;
 		System.out.println(">>>>>>>FRONTIER UPDATE...");
-		LinkRelevance lr = new LinkRelevance(new URL(hubRelevance[0].getWord()), rel);
-		frontier.update(lr);
+		LinkRelevance lr = new LinkRelevance(new URL(hubRelevance[0].getWord()), LinkRelevance.TYPE_FORWARD, rel);
+		linkFrontier.update(lr);
 		for (int i = 1; i < hubRelevance.length; i++) {
 			if(i % (hubRelevance.length/99) == 0 ){
 				rel--;
 			}
 			if(hubRelevance[i].getWord() != null){
-//				double weight = (hubRelevance[i].getWeight()/hubRelevance[0].getWeight())*100 + 100;
-				lr = new LinkRelevance(new URL(hubRelevance[i].getWord()), rel);
+				lr = new LinkRelevance(new URL(hubRelevance[i].getWord()), LinkRelevance.TYPE_FORWARD, rel);
 //				if(i < 50){
 //					System.out.println("###" + lr.getURL().toString() + "=" + lr.getRelevance());	
 //				}
-				frontier.update(lr);
+				linkFrontier.update(lr);
 			}
 		}
 		VSMElement[] authRelevance = salsa.getAuthValues();
 		rel = 299;
-		lr = new LinkRelevance(new URL(authRelevance[0].getWord()), rel);
-		frontier.update(lr);
+		lr = new LinkRelevance(new URL(authRelevance[0].getWord()), LinkRelevance.TYPE_FORWARD, rel);
+		linkFrontier.update(lr);
 		for (int i = 1; i < authRelevance.length; i++) {
 			if(i % (authRelevance.length/99) == 0 ){
 				rel--;
 			}
 			if(authRelevance[i].getWord() != null){
-//				double weight = (authRelevance[i].getWeight()/authRelevance[0].getWeight())*100 + 200;
-				lr = new LinkRelevance(new URL(authRelevance[i].getWord()), rel);
+				lr = new LinkRelevance(new URL(authRelevance[i].getWord()), LinkRelevance.TYPE_FORWARD, rel);
 //				if(i < 500){
 //					System.out.println("###" + i + ":" + lr.getURL().toString() + "=" + lr.getRelevance() + ":" + authRelevance[i].getWeight());					
 //				}
-				frontier.update(lr);
+				linkFrontier.update(lr);
 			}
 		}
 		salsa = null;
@@ -215,29 +218,29 @@ public class OnlineLearning {
 		System.out.println(">>>>>>>FRONTIER UPDATE...");
 		VSMElement[] hubRelevance = hits.getHubRelevance();
 		double rel = 199;
-		LinkRelevance lr = new LinkRelevance(new URL(hubRelevance[0].getWord()), rel);
-		frontier.update(lr);
+		LinkRelevance lr = new LinkRelevance(new URL(hubRelevance[0].getWord()), LinkRelevance.TYPE_FORWARD, rel); 
+		linkFrontier.update(lr);
 		for (int i = 1; i < hubRelevance.length; i++) {
 			if(i % (hubRelevance.length/99) == 0 ){
 				rel--;
 			}
 			if(hubRelevance[i].getWord() != null){
-				lr = new LinkRelevance(new URL(hubRelevance[i].getWord()), rel);
-				frontier.update(lr);
+				lr = new LinkRelevance(new URL(hubRelevance[i].getWord()), LinkRelevance.TYPE_FORWARD, rel); 
+				linkFrontier.update(lr);
 			}
 		}
 		VSMElement[] authRelevance = hits.getAuthRelevance();
 		rel = 299;
-		lr = new LinkRelevance(new URL(authRelevance[0].getWord()), rel);
-		frontier.update(lr);
+		lr = new LinkRelevance(new URL(authRelevance[0].getWord()), LinkRelevance.TYPE_FORWARD, rel);  
+		linkFrontier.update(lr);
 		for (int i = 1; i < authRelevance.length; i++) {
 			if(i % (authRelevance.length/99) == 0 ){
 				rel--;
 			}
 			if(authRelevance[i].getWord() != null){
-				lr = new LinkRelevance(new URL(authRelevance[i].getWord()), rel);
+				lr = new LinkRelevance(new URL(authRelevance[i].getWord()), LinkRelevance.TYPE_FORWARD, rel);
 //				System.out.println(">>>>>AUTH:" + lr.getURL().toString() + "=" + lr.getRelevance());
-				frontier.update(lr);
+				linkFrontier.update(lr);
 			}
 		}
 	}
@@ -249,12 +252,12 @@ public class OnlineLearning {
 		if(updateFrontier){
 			manager.setOutlinkClassifier(outlinkClassifier);
 		}
-		LinkNeighborhood[] outLNs = rep.getLNs();
-		for (int i = 0; i < outLNs.length; i++) {
-			if(outLNs[i] != null){
-				LinkRelevance lr = outlinkClassifier.classify(outLNs[i]);
+		LinkMetadata[] outLMs = rep.getOutlinkLMs();
+		for (int i = 0; i < outLMs.length; i++) {
+			if(outLMs[i] != null){
+				LinkRelevance lr = outlinkClassifier.classify(outLMs[i], 1); // Backward compatibility note: old relevance corresponds to type 1
 				if(updateFrontier){
-					frontier.update(lr);
+					linkFrontier.update(lr);
 				}
 			}
 		}
@@ -267,23 +270,22 @@ public class OnlineLearning {
 		if(updateFrontier){
 			manager.setOutlinkClassifier(outlinkClassifier);
 		}
-		LinkNeighborhood[] outLNs = rep.getLNs();
-		HashSet<String> visitedAuths = frontier.visitedAuths();
+		LinkMetadata[] outLMs = rep.getOutlinkLMs();
+		HashSet<String> visitedAuths = linkFrontier.visitedAuths();
 		HashSet<String> usedLinks = new HashSet<String>();
-//		Vector<VSMElement> temp = new Vector<VSMElement> ();
-		for (int i = 0; i < outLNs.length; i++) {
-			if(outLNs[i] != null){
-				LinkRelevance lr = outlinkClassifier.classify(outLNs[i]);
+		for (int i = 0; i < outLMs.length; i++) {
+			if(outLMs[i] != null){
+				LinkRelevance lr = outlinkClassifier.classify(outLMs[i],LinkRelevance.TYPE_FORWARD);
 				if(updateFrontier){
-					frontier.update(lr);
+					linkFrontier.update(lr);
 					usedLinks.add(lr.getURL().toString());
 				}
-				String id = rep.getID(outLNs[i].getLink().toString());
+				String id = rep.getID(outLMs[i].getLink().toString());
 				if(id != null){
 					VSMElement elem = new VSMElement(id, (lr.getRelevance()-200)/100);
-					if(visitedAuths.contains(outLNs[i].getLink().toString())){
-						if(relSites.contains(outLNs[i].getLink().toString())){
-							elem.setWeight(1);
+					if(visitedAuths.contains(outLMs[i].getLink().toString())){
+						if(relSites.contains(outLMs[i].getLink().toString())){
+							elem.setWeight(1d);
 						}else{
 							elem.setWeight(0.0000001);
 						}
@@ -292,17 +294,17 @@ public class OnlineLearning {
 				}
 			}
 		}
-		System.out.println(">>>BUILDING BACKLINK CLASSIFIER...");
+		System.out.println(">>>BUILDING BACKLINK BACKWARD CLASSIFIER...");
 		LinkClassifier backlinkClassifier = classifierBuilder.backlinkTraining(elems);
 		if(updateFrontier){
-			manager.setBacklinkClassifier(backlinkClassifier);
+			manager.setBacklinkForwardClassifier(backlinkClassifier);
 		}
-		LinkNeighborhood[] backLNs = rep.getBacklinkLN();
+		LinkMetadata[] backLNs = rep.getBacklinkLMs();
 		for (int i = 0; i < backLNs.length; i++) {
 			if(backLNs[i] != null){
-				LinkRelevance lr = backlinkClassifier.classify(backLNs[i]);
+				LinkRelevance lr = backlinkClassifier.classify(backLNs[i],LinkRelevance.TYPE_BACKLINK_FORWARD);
 				if(updateFrontier && lr != null && !usedLinks.contains(lr.getURL().toString())){
-					frontier.update(lr);
+					backlinkFrontier.update(lr);
 				}
 				String id = rep.getID(backLNs[i].getLink().toString());
 				if(id != null && lr != null){
@@ -314,36 +316,4 @@ public class OnlineLearning {
 		return elems;
 	}
 	
-//	public static void main(String[] args) {
-//		try {
-//			ParameterFile config = new ParameterFile(args[0]);
-//			PersistentHashtable url2id = new PersistentHashtable(config.getParam("URL_ID_DIRECTORY"),100000);
-//			PersistentHashtable authID = new PersistentHashtable(config.getParam("AUTH_ID_DIRECTORY"),100000);
-//			PersistentHashtable authGraph = new PersistentHashtable(config.getParam("AUTH_GRAPH_DIRECTORY"),100000);
-//			PersistentHashtable hubID = new PersistentHashtable(config.getParam("HUB_ID_DIRECTORY"),100000);
-//			PersistentHashtable hubGraph = new PersistentHashtable(config.getParam("HUB_GRAPH_DIRECTORY"),100000);
-//			BipartiteGraphRep rep = new BipartiteGraphRep(authGraph,url2id,authID,hubID,hubGraph);
-//			PersistentHashtable persistentHash = new PersistentHashtable(args[5],100000);
-//			FrontierTargetRepositoryBaseline frontier = new FrontierTargetRepositoryBaseline(persistentHash,10000);
-//			StopList stoplist = new StopListArquivo(args[1]);
-//			WrapperNeighborhoodLinks wrapper = new WrapperNeighborhoodLinks(stoplist);
-//			ClassifierBuilder cb = new ClassifierBuilder(rep,stoplist,wrapper,frontier);
-//			BipartiteGraphManager manager = new BipartiteGraphManager(frontier,rep,null,null);
-//			OnlineLearning onlineLearning = new OnlineLearning(frontier, manager, cb,"LINK_CLASSIFIERS",args[2]);
-//			BufferedReader input1 = new BufferedReader(new FileReader(new File(args[7])));
-//			HashSet<String> relSites = new HashSet<String>();
-//			for (String line = input1.readLine(); line != null; line = input1.readLine()) {
-//				String[] links = line.split(" ");
-////				URL url = new URL(links[1]);
-//				if(!relSites.contains(links[1])){
-//					relSites.add(links[1]);	
-//				}
-//			}
-//			onlineLearning.execute();
-////			onlineLearning.runSALSA(relSites);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//	}
-
 }

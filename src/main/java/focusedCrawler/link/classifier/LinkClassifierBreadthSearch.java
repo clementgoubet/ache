@@ -5,10 +5,10 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Random;
 
+import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.link.classifier.builder.Instance;
 import focusedCrawler.link.classifier.builder.LinkNeighborhoodWrapper;
 import focusedCrawler.link.frontier.LinkRelevance;
-import focusedCrawler.util.parser.LinkNeighborhood;
 import focusedCrawler.util.parser.PaginaURL;
 
 public class LinkClassifierBreadthSearch implements LinkClassifier {
@@ -23,8 +23,10 @@ public class LinkClassifierBreadthSearch implements LinkClassifier {
         this.randomGenerator = new Random();
     }
 
-    public LinkRelevance[] classify(PaginaURL page) throws LinkClassifierException {
-
+    public LinkRelevance[] classify(PaginaURL page, int type) throws LinkClassifierException {
+		if(type == LinkRelevance.TYPE_BACKLINK_BACKWARD){
+			throw new IllegalArgumentException("This classifier is not suited for TYPE_BACKLINK_BACKWARD (classifying whether a page URL is worth backlinking)");
+		}
         try {
             HashMap<String, Instance> urlWords = wrapper.extractLinks(page, attributes);
 
@@ -38,7 +40,7 @@ public class LinkClassifierBreadthSearch implements LinkClassifier {
                 if (relevance < -1) {
                     relevance = -1;
                 }
-                linkRelevance[count] = new LinkRelevance(new URL(url), relevance);
+                linkRelevance[count] = new LinkRelevance(new URL(url), type, relevance);
                 count++;
             }
             return linkRelevance;
@@ -48,9 +50,13 @@ public class LinkClassifierBreadthSearch implements LinkClassifier {
         }
     }
 
-    public LinkRelevance classify(LinkNeighborhood ln) throws LinkClassifierException {
+    public LinkRelevance classify(LinkMetadata lm, int type) throws LinkClassifierException {
         // TODO Auto-generated method stub
         return null;
     }
+    
+	public LinkRelevance[] classify(LinkMetadata[] lms, int type) throws LinkClassifierException{
+		return null;
+	}
 
 }

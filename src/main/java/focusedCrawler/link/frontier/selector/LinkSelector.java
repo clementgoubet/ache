@@ -5,6 +5,6 @@ import focusedCrawler.link.frontier.LinkRelevance;
 
 public interface LinkSelector {
     
-    public LinkRelevance[] select(Frontier frontier, int numberOfLinks);
+    public LinkRelevance[] select(Frontier frontier, int type, int numberOfLinks);
 
 }

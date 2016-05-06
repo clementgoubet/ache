@@ -8,8 +8,7 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import focusedCrawler.link.BipartiteGraphRepository;
-import focusedCrawler.util.parser.BackLinkNeighborhood;
-import focusedCrawler.util.parser.LinkNeighborhood;
+import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.util.vsm.VSMElement;
 import focusedCrawler.util.vsm.VSMElementComparator;
 
@@ -27,18 +26,18 @@ public class InOutLinks {
 		Iterator<String> values = relSites.iterator();
 		while(values.hasNext()){
 			String site = values.next();
-			BackLinkNeighborhood[] backlinks = graphRep.getBacklinks(new URL(site));
+			LinkMetadata[] backlinks = graphRep.getBacklinksLM(new URL(site));
 			if(backlinks == null){
 				continue;
 			}
 			for (int j = 0; j < backlinks.length; j++) {
 				VSMElement count = hubCounts.get(backlinks[j].getLink());
 				if(count == null){
-					count = new VSMElement(backlinks[j].getLink(), 0);
+					count = new VSMElement(backlinks[j].getUrl(), 0);
 				}
 				count.setWeight(count.getWeight()+1);
-				hubCounts.put(backlinks[j].getLink(), count);
-				LinkNeighborhood[] outlinks = graphRep.getOutlinks(new URL(backlinks[j].getLink()));
+				hubCounts.put(backlinks[j].getUrl(), count);
+				LinkMetadata[] outlinks = graphRep.getOutlinksLM(new URL(backlinks[j].getUrl()));
 				for (int i = 0; i < outlinks.length; i++) {
 					if(outlinks[i] == null){
 						continue;

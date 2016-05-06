@@ -80,8 +80,8 @@ link_storage.link_strategy.backlinks: true # SAVE_BACKLINKS FALSE
 # - LinkClassifierImpl: link strategy using a link classifier
 # - LinkClassifierAuthority: link strategy for the bipartite crawling
 
-link_storage.link_classifier.type: LinkClassifierImpl
-link_storage.link_classifier.parameters.class_values: ["0", "1", "2"] #CLASS_VALUES 0 1 2
+link_storage.link_classifier.outlinks.type: LinkClassifierImpl
+link_storage.link_classifier.outlinks.parameters.class_values: ["0", "1", "2"] #CLASS_VALUES 0 1 2
 
 # Retrain link classifiers on-the-fly
 link_storage.online_learning.enabled: false
