@@ -48,18 +48,18 @@ import focusedCrawler.util.string.StopList;
  * @version 1.0
  */
 
-public class LinkNeighborhoodWrapper {
+public class LinkMetadataWrapper {
 
   private StopList stoplist;
   private String[][] fieldWords;
   private PorterStemmer stemmer;
 
-  public LinkNeighborhoodWrapper(StopList stoplist) {
+  public LinkMetadataWrapper(StopList stoplist) {
     this.stoplist = stoplist;
     stemmer = new PorterStemmer();
   }
 
-  public LinkNeighborhoodWrapper() {
+  public LinkMetadataWrapper() {
     this.stoplist = null;
   }
 
@@ -224,7 +224,7 @@ public class LinkNeighborhoodWrapper {
     private  HashMap<String, WordField[]> extractLinksFull(LinkMetadata lm) throws  MalformedURLException {
     	HashMap<String, WordField[]> result = new HashMap<String, WordField[]>();
     	List<WordField> words = new ArrayList<WordField>();
-    	String urlStr = lm.getLink().toString();
+    	String urlStr = lm.getUrl();
     	getURLWords(urlStr, words);
     	if(lm.getImgSrc() != null){
             PaginaURL pageParser = new PaginaURL(new URL("http://"),lm.getImgSrc(), stoplist);

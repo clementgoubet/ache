@@ -1597,7 +1597,7 @@ public class PaginaURL {
                                 		  lm = null;
                                 	  }
                                 	  try {
-                                	  lm = new LinkMetadata(new URL(urlTemp));
+                                	  lm = new LinkMetadata(urlTemp);
                                 	  } catch (Exception e) {
                                 	      // Ignoring Exception on purpose since the URL in page is not proper
                                 	  }
@@ -1607,7 +1607,7 @@ public class PaginaURL {
                                        && atributo.equals("href")) {
                                 String urlTemp = adicionaLink(str, base);
                                 if(urlTemp!= null && urlTemp.startsWith("http")){
-                                  lm = new LinkMetadata(new URL(urlTemp));
+                                  lm = new LinkMetadata(urlTemp);
                                 }
 //                                System.out.println("CREATE LINK:"  + urlTemp);
                             } else if (tagName.equals("area")
@@ -1615,7 +1615,7 @@ public class PaginaURL {
                                 adicionaLink(str, base);
                                 String urlTemp = adicionaLink(str, base);
                                 if(urlTemp!= null && urlTemp.startsWith("http")){
-                                  lm = new LinkMetadata(new URL(urlTemp));
+                                  lm = new LinkMetadata(urlTemp);
                                 }
                             } else if (tagName.equals("img")
                                        && atributo.equals("src")) {

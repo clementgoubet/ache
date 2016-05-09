@@ -13,7 +13,7 @@ import weka.classifiers.Classifier;
 import weka.core.Instances;
 import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.link.classifier.builder.Instance;
-import focusedCrawler.link.classifier.builder.LinkNeighborhoodWrapper;
+import focusedCrawler.link.classifier.builder.LinkMetadataWrapper;
 import focusedCrawler.link.classifier.builder.WordField;
 import focusedCrawler.link.frontier.LinkRelevance;
 import focusedCrawler.util.ParameterFile;
@@ -25,10 +25,10 @@ public class LinkClassifierRegression implements LinkClassifier{
 
 	  private Classifier classifier;
 	  private Instances instances;
-	  private LinkNeighborhoodWrapper wrapper;
+	  private LinkMetadataWrapper wrapper;
 	  private String[] attributes;
 	  
-	  public LinkClassifierRegression(Classifier classifier, Instances instances, LinkNeighborhoodWrapper wrapper, String[] attributes) {
+	  public LinkClassifierRegression(Classifier classifier, Instances instances, LinkMetadataWrapper wrapper, String[] attributes) {
 		  this.classifier = classifier;
 		  this.instances = instances;
 		  this.wrapper = wrapper;
@@ -133,7 +133,7 @@ public class LinkClassifierRegression implements LinkClassifier{
 		ParameterFile config = new ParameterFile(args[0]);
 		LinkClassifier linkClassifier = null;
 	    StopList stoplist = new StopListArquivo(config.getParam("STOPLIST_FILES"));
-	      LinkNeighborhoodWrapper wrapper = new LinkNeighborhoodWrapper(stoplist);
+	      LinkMetadataWrapper wrapper = new LinkMetadataWrapper(stoplist);
 	      String[] attributes = config.getParam("ATTRIBUTES", " ");
 	      
 	      String[][] fieldWords = new String[WordField.FIELD_NAMES.length][];
@@ -185,7 +185,7 @@ public class LinkClassifierRegression implements LinkClassifier{
 //		                                            attributes,
 //		                                            config.getParamInt("LEVEL"));
 	      linkClassifier = new LinkClassifierRegression(classifier, insts, wrapper,attributes);
-	      LinkMetadata lm = new LinkMetadata(new URL("http://www.new.com/sport"));
+	      LinkMetadata lm = new LinkMetadata("http://www.new.com/sport");
 	      lm.setAnchor(new String[]{"advertis","subscrib","opinion","site", "obituari"});
 	      lm.setAround(new String[]{"advertis","subscrib","opinion","site", "obituari"});
 	      LinkRelevance lr = linkClassifier.classify(lm,1);

@@ -8,7 +8,7 @@ import weka.classifiers.Classifier;
 import weka.core.Instances;
 import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.link.classifier.builder.Instance;
-import focusedCrawler.link.classifier.builder.LinkNeighborhoodWrapper;
+import focusedCrawler.link.classifier.builder.LinkMetadataWrapper;
 import focusedCrawler.link.frontier.LinkRelevance;
 import focusedCrawler.util.parser.PaginaURL;
 
@@ -21,14 +21,14 @@ public class LinkClassifierHub implements LinkClassifier{
 
 	private Classifier classifier;
 	private Instances instances;
-	private LinkNeighborhoodWrapper wrapper;
+	private LinkMetadataWrapper wrapper;
 	private String[] attributes;
 	
 	public LinkClassifierHub(){
 		
 	}
 	
-	public LinkClassifierHub(Classifier classifier, Instances instances, LinkNeighborhoodWrapper wrapper,String[] attributes) {
+	public LinkClassifierHub(Classifier classifier, Instances instances, LinkMetadataWrapper wrapper,String[] attributes) {
 		this.classifier = classifier;
 		this.instances = instances;
 		this.wrapper = wrapper;

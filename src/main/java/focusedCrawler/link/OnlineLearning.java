@@ -280,11 +280,11 @@ public class OnlineLearning {
 					linkFrontier.update(lr);
 					usedLinks.add(lr.getURL().toString());
 				}
-				String id = rep.getID(outLMs[i].getLink().toString());
+				String id = rep.getID(outLMs[i].getUrl());
 				if(id != null){
 					VSMElement elem = new VSMElement(id, (lr.getRelevance()-200)/100);
-					if(visitedAuths.contains(outLMs[i].getLink().toString())){
-						if(relSites.contains(outLMs[i].getLink().toString())){
+					if(visitedAuths.contains(outLMs[i].getUrl())){
+						if(relSites.contains(outLMs[i].getUrl())){
 							elem.setWeight(1d);
 						}else{
 							elem.setWeight(0.0000001);
@@ -306,7 +306,7 @@ public class OnlineLearning {
 				if(updateFrontier && lr != null && !usedLinks.contains(lr.getURL().toString())){
 					backlinkFrontier.update(lr);
 				}
-				String id = rep.getID(backLNs[i].getLink().toString());
+				String id = rep.getID(backLNs[i].getUrl());
 				if(id != null && lr != null){
 					VSMElement elem = new VSMElement(id, (lr.getRelevance()-100)/100);
 					elems.put(id + "_hub",elem);

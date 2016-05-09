@@ -15,8 +15,6 @@ public class LinkMetadata {
 	
 	private String url;
 	
-	private URL link;
-
 	
 	// data from the page in itself
 	@JsonProperty("is_page_info_set")
@@ -85,15 +83,6 @@ public class LinkMetadata {
 	
 	public LinkMetadata(String url) {
 		this.url = url;
-		try {
-			this.link = new URL(url);
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
-	}
-	public LinkMetadata(URL link) {
-		this.link = link;
-		this.url = link.toString();
 	}
 	
 	
@@ -126,10 +115,6 @@ public class LinkMetadata {
 		this.pageRelevance = pageRelevance;
 	}
 
-	public void setLink(URL link){
-		this.link = link;
-	}
-	
 	public void setAnchor(String[] anchor){
 	    this.anchor = anchor;
 	}
@@ -201,14 +186,27 @@ public class LinkMetadata {
 		return pageContent;
 	}
 	
-	public URL getLink(){
-		return this.link;
+	@JsonIgnore
+	public String getDomainName(){
+		try {
+			URL link = new URL(url);
+			String domain = link.getHost();
+			return domain.startsWith("www.") ? domain.substring(4) : domain;
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	@JsonIgnore
-	public String getDomainName(){
-		String domain = link.getHost();
-		return domain.startsWith("www.") ? domain.substring(4) : domain;
+	public URL getLink(){
+		try {
+			URL link = new URL(url);
+			return link;
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public int getAroundPosition(){
@@ -311,7 +309,6 @@ public class LinkMetadata {
 		lm.setAroundPosition(aroundPosition);
 		lm.setImgAlt(imgAlt);
 		lm.setImgSource(imgSource);
-		lm.setLink(link);
 		lm.setPageContent(pageContent);
 		lm.setSameSite(sameSite);
 		lm.setSearchEngineTitle(searchEngineTitle);
@@ -327,9 +324,10 @@ public class LinkMetadata {
 	public String toString(){
 		String result = "";
 		result += "\turl: "+url+"\n";
+		result += "\tisPageInfoSet: "+isPageInfoSet+"\n";
+		result += "\tpageContent: "+pageContent+"\n";
 		result += "\tpageRelevance: "+pageRelevance+"\n";
 		result += "\tisTargetOfBacklink: "+isTargetOfBacklink+"\n";
-		result += "\tisTargetOfOutlink: "+isTargetOfOutlink+"\n";
 		result += "\tbacklinkUrls: ";
 		for(int i=0; i<backlinkUrls.size();i++){
 			result += backlinkUrls.elementAt(i)+" ";
@@ -342,7 +340,8 @@ public class LinkMetadata {
 		for(int i=0; i<backlinkTitles.size();i++){
 			result += backlinkTitles.elementAt(i)+" ";
 		}
-		result += "\n\tanchor: ";
+		result += "\n\tisTargetOfOutlink: "+isTargetOfOutlink+"\n";
+		result += "\tanchor: ";
 		for(int i=0; i<anchor.length;i++){
 			result += anchor[i]+" ";
 		}
@@ -354,13 +353,10 @@ public class LinkMetadata {
 		result += "\taroundPosition: "+aroundPosition+"\n";
 		result += "\timgAlt: "+imgAlt+"\n";
 		result += "\timgSource: "+imgSource+"\n";
-		result += "\tlink: "+link+"\n";
-		result += "\tpageContent: "+pageContent+"\n";
 		result += "\tsameSite: "+sameSite+"\n";
+		result += "\tisPageInfoSearchEngineSet: "+isPageInfoSearchEngineSet+"\n";
 		result += "\tsearchEngineTitle: "+searchEngineTitle+"\n";
 		result += "\tsearchEngineSnippet: "+searchEngineSnippet+"\n";
-		result += "\tisPageInfoSearchEngineSet: "+isPageInfoSearchEngineSet+"\n";
-		result += "\tisPageInfoSet: "+isPageInfoSet+"\n";
 		return result;
 	}
 	

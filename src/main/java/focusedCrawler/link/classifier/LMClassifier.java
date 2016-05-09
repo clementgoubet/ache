@@ -12,7 +12,7 @@ import weka.classifiers.Classifier;
 import weka.core.Instances;
 import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.link.classifier.builder.Instance;
-import focusedCrawler.link.classifier.builder.LinkNeighborhoodWrapper;
+import focusedCrawler.link.classifier.builder.LinkMetadataWrapper;
 import focusedCrawler.util.ParameterFile;
 import focusedCrawler.util.string.StopList;
 
@@ -20,11 +20,11 @@ public class LMClassifier {
 
 	private Classifier classifier;
 	private Instances instances;
-	private LinkNeighborhoodWrapper wrapper;
+	private LinkMetadataWrapper wrapper;
 	private String[] attributes;
 
 	public LMClassifier(Classifier classifier, Instances instances,
-	                    LinkNeighborhoodWrapper wrapper, String[] attributes) {
+	                    LinkMetadataWrapper wrapper, String[] attributes) {
 		this.classifier = classifier;
 		this.instances = instances;
 		this.wrapper = wrapper;
@@ -71,7 +71,7 @@ public class LMClassifier {
 	    insts.setClassIndex(attributes.length);
 	    
 	    
-	    LinkNeighborhoodWrapper wrapper = loadWrapper(attributes, stoplist);
+	    LinkMetadataWrapper wrapper = loadWrapper(attributes, stoplist);
 	    
 	    Classifier classifier = loadClassifier(modelFilePath);
 	    
@@ -79,8 +79,8 @@ public class LMClassifier {
 	    
 	}
     
-    public static LinkNeighborhoodWrapper loadWrapper(String[] attributes, StopList stoplist) {
-        LinkNeighborhoodWrapper wrapper = new LinkNeighborhoodWrapper(stoplist);
+    public static LinkMetadataWrapper loadWrapper(String[] attributes, StopList stoplist) {
+        LinkMetadataWrapper wrapper = new LinkMetadataWrapper(stoplist);
         wrapper.setFeatures(attributes);
         return wrapper;
     }
