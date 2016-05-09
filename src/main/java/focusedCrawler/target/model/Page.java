@@ -174,7 +174,7 @@ public class Page implements Serializable {
     //Returns LM of the current page
     @JsonIgnore
     public LinkMetadata getLinkMetadata(){
-        LinkMetadata lm = new LinkMetadata(url);
+        LinkMetadata lm = new LinkMetadata(url.toString());
         lm.setPageContent(content);
         lm.setPageRelevance((int)relevance);
         return lm;

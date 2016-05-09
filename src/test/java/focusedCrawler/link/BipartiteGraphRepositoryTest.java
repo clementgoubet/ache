@@ -36,15 +36,15 @@ public class BipartiteGraphRepositoryTest {
     	BiparitieGraphRepConfig config = new BiparitieGraphRepConfig();
     	BipartiteGraphRepository repo = new BipartiteGraphRepository(tempFolder.newFolder().getPath(),config);
     	
-        LinkMetadata lm1 = new LinkMetadata(urlParent);
+        LinkMetadata lm1 = new LinkMetadata(urlParent.toString());
         lm1.setPageContent(pageContent);
         lm1.setPageRelevance(1);
         LinkMetadata[] lms = new LinkMetadata[2];
-        lms[0] = new LinkMetadata(urlChild1);
+        lms[0] = new LinkMetadata(urlChild1.toString());
         lms[0].setAnchor(anchor1);
-        lms[1] = new LinkMetadata(urlChild2);
+        lms[1] = new LinkMetadata(urlChild2.toString());
         lms[1].setAnchor(anchor2);
-        LinkMetadata lm4 = new LinkMetadata(urlChild1);
+        LinkMetadata lm4 = new LinkMetadata(urlChild1.toString());
         lm4.setPageContent(pageContent1);
         lm4.setPageRelevance(2);
         LinkMetadata lm5 = new LinkMetadata();

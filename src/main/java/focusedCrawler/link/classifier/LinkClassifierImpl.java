@@ -63,25 +63,6 @@ public class LinkClassifierImpl implements LinkClassifier{
    * @throws LinkClassifierException
    */
 	
-	// SHOULD NOT BE USED!!!
-/*  public LinkRelevance[] classify(PaginaURL page, int type) throws LinkClassifierException {
-	  if(type == LinkRelevance.TYPE_BACKLINK_BACKWARD){
-		  throw new IllegalArgumentException("This classifier is not suited for type TYPE_BACKLINK_BACKWARD");
-	  }
-	  LinkRelevance[] linkRelevance = null;
-	  try {
-		  LinkMetadata[] lms = page.getLinkMetadatas();
-		  linkRelevance = new LinkRelevance[lns.length];
-		  for (int i = 0; i < lns.length; i++) {
-			  linkRelevance[i] = classify(lns[i], type);
-		  }
-	  }catch(Exception ex){
-		  ex.printStackTrace();
-		  throw new LinkClassifierException(ex.getMessage());
-	  }
-	  return linkRelevance;
-  }*/
-  
   public LinkRelevance[] classify(PaginaURL page, int type) throws LinkClassifierException {
 	  throw new IllegalArgumentException("This classifier is not suited for this use");
   }
@@ -105,7 +86,7 @@ public class LinkClassifierImpl implements LinkClassifier{
 		  }
 		  classificationResult = weights[classificationResult];
 		  double result = (classificationResult * intervalRandom) + probability ;  	
-		  linkRel = new LinkRelevance(lm.getLink(),type,result);
+		  linkRel = new LinkRelevance(lm.getUrl(),type,result);
 	  }catch (MalformedURLException ex) {
 		  ex.printStackTrace();
 		  throw new LinkClassifierException(ex.getMessage());

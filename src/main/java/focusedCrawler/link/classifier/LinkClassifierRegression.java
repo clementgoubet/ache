@@ -185,7 +185,7 @@ public class LinkClassifierRegression implements LinkClassifier{
 //		                                            attributes,
 //		                                            config.getParamInt("LEVEL"));
 	      linkClassifier = new LinkClassifierRegression(classifier, insts, wrapper,attributes);
-	      LinkMetadata lm = new LinkMetadata(new URL("http://www.new.com/sport"));
+	      LinkMetadata lm = new LinkMetadata("http://www.new.com/sport");
 	      lm.setAnchor(new String[]{"advertis","subscrib","opinion","site", "obituari"});
 	      lm.setAround(new String[]{"advertis","subscrib","opinion","site", "obituari"});
 	      LinkRelevance lr = linkClassifier.classify(lm,1);

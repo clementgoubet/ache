@@ -201,7 +201,7 @@ public class LinkClassifierBuilder {
 		Vector<LinkMetadata> allLMs = new Vector<LinkMetadata>();
 		for (int i = 0; i < trainingSet.size(); i++) {
 			String[] parts = trainingSet.elementAt(i).getWord().split(":::");
-			LinkMetadata lm = new LinkMetadata(new URL(parts[0]));
+			LinkMetadata lm = new LinkMetadata(parts[0]);
 			if(parts.length > 1){
 				StringTokenizer tokenizer = new StringTokenizer(parts[1]," ");
 				Vector<String> aroundTemp = new Vector<String>();
