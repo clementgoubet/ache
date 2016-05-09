@@ -35,7 +35,7 @@ import focusedCrawler.link.classifier.LinkClassifierFactory;
 import focusedCrawler.link.classifier.LinkClassifierFactoryException;
 import focusedCrawler.link.classifier.LinkClassifierFactoryImpl;
 import focusedCrawler.link.classifier.builder.LinkClassifierBuilder;
-import focusedCrawler.link.classifier.builder.LinkNeighborhoodWrapper;
+import focusedCrawler.link.classifier.builder.LinkMetadataWrapper;
 import focusedCrawler.link.frontier.FrontierManager;
 import focusedCrawler.link.frontier.FrontierManagerFactory;
 import focusedCrawler.link.frontier.FrontierPersistentException;
@@ -264,7 +264,7 @@ public class LinkStorage extends StorageDefault{
 
         if (config.isUseOnlineLearning()) {
             StopList stoplist = new StopListArquivo(stoplistFile);
-            LinkNeighborhoodWrapper wrapper = new LinkNeighborhoodWrapper(stoplist);
+            LinkMetadataWrapper wrapper = new LinkMetadataWrapper(stoplist);
             
             LinkClassifierBuilder cb = new LinkClassifierBuilder(graphRep, stoplist, wrapper, frontierManager.getLinkFrontier(), frontierManager.getBacklinkFrontier());
             

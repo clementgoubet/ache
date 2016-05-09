@@ -37,7 +37,7 @@ public class LinkClassifierBuilder {
 
 	private BipartiteGraphRepository graphRep;
 	
-	private LinkNeighborhoodWrapper wrapper;
+	private LinkMetadataWrapper wrapper;
 
 	private StopList stoplist;
 
@@ -49,7 +49,7 @@ public class LinkClassifierBuilder {
 
 	private String[] features;
 	
-	public LinkClassifierBuilder(BipartiteGraphRepository graphRep, StopList stoplist, LinkNeighborhoodWrapper wrapper, Frontier linkFrontier, Frontier backlinkFrontier){
+	public LinkClassifierBuilder(BipartiteGraphRepository graphRep, StopList stoplist, LinkMetadataWrapper wrapper, Frontier linkFrontier, Frontier backlinkFrontier){
 		this.graphRep = graphRep;
 		this.stemmer = new PorterStemmer();
 		this.stoplist = stoplist;
@@ -58,7 +58,7 @@ public class LinkClassifierBuilder {
 		this.backlinkFrontier = backlinkFrontier;
 	}
 	
-	public LinkClassifierBuilder(LinkNeighborhoodWrapper wrapper, StopList stoplist) throws IOException{
+	public LinkClassifierBuilder(LinkMetadataWrapper wrapper, StopList stoplist) throws IOException{
 		this.stoplist = stoplist;
 		this.stemmer = new PorterStemmer();
 		this.wrapper = wrapper;

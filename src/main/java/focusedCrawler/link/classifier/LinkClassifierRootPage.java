@@ -32,26 +32,26 @@ import weka.classifiers.Classifier;
 import weka.core.Instances;
 import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.link.classifier.builder.Instance;
-import focusedCrawler.link.classifier.builder.LinkNeighborhoodWrapper;
+import focusedCrawler.link.classifier.builder.LinkMetadataWrapper;
 import focusedCrawler.link.frontier.LinkRelevance;
 import focusedCrawler.util.parser.PaginaURL;
 
 
 public class LinkClassifierRootPage implements LinkClassifier{
 
-  private LinkNeighborhoodWrapper wrapper;
+  private LinkMetadataWrapper wrapper;
   private String[] attributes;
   private Classifier classifier;
   private Instances instances;
 
   
-  public LinkClassifierRootPage(LinkNeighborhoodWrapper wrapper,String[] attribute) {
+  public LinkClassifierRootPage(LinkMetadataWrapper wrapper,String[] attribute) {
      this.wrapper = wrapper;
      this.attributes = attribute;
    }
 
   
-  public LinkClassifierRootPage(Classifier classifier, Instances instances, LinkNeighborhoodWrapper wrapper,String[] attribute) {
+  public LinkClassifierRootPage(Classifier classifier, Instances instances, LinkMetadataWrapper wrapper,String[] attribute) {
 	  this(wrapper,attribute);
 	  this.classifier = classifier;
 	  this.instances = instances;

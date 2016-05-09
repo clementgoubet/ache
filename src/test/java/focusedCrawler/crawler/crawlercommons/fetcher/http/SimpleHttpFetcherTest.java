@@ -59,6 +59,7 @@ import focusedCrawler.crawler.crawlercommons.test.ResourcesResponseHandler;
 import focusedCrawler.crawler.crawlercommons.test.SimulationWebServer;
 import focusedCrawler.crawler.crawlercommons.test.TestUtils;
 
+@SuppressWarnings("deprecation")
 public class SimpleHttpFetcherTest {
 
     private SimulationWebServer _webServer;

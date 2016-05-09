@@ -7,17 +7,17 @@ import java.util.Random;
 
 import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.link.classifier.builder.Instance;
-import focusedCrawler.link.classifier.builder.LinkNeighborhoodWrapper;
+import focusedCrawler.link.classifier.builder.LinkMetadataWrapper;
 import focusedCrawler.link.frontier.LinkRelevance;
 import focusedCrawler.util.parser.PaginaURL;
 
 public class LinkClassifierBreadthSearch implements LinkClassifier {
 
-    private LinkNeighborhoodWrapper wrapper;
+    private LinkMetadataWrapper wrapper;
     private String[] attributes;
     private Random randomGenerator;
 
-    public LinkClassifierBreadthSearch(LinkNeighborhoodWrapper wrapper, String[] attribute) {
+    public LinkClassifierBreadthSearch(LinkMetadataWrapper wrapper, String[] attribute) {
         this.wrapper = wrapper;
         this.attributes = attribute;
         this.randomGenerator = new Random();

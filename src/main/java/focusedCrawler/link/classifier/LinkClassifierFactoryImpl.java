@@ -23,7 +23,7 @@
 */
 package focusedCrawler.link.classifier;
 
-import focusedCrawler.link.classifier.builder.LinkNeighborhoodWrapper;
+import focusedCrawler.link.classifier.builder.LinkMetadataWrapper;
 import focusedCrawler.util.ParameterFile;
 import focusedCrawler.util.string.StopListArquivo;
 import focusedCrawler.util.string.StopList;
@@ -98,7 +98,7 @@ public class LinkClassifierFactoryImpl implements LinkClassifierFactory {
           ParameterFile config = new ParameterFile(featureFilePath); 
           String[] attributes = config.getParam("ATTRIBUTES", " ");
           
-          LinkNeighborhoodWrapper wrapper = new LinkNeighborhoodWrapper(stoplist);
+          LinkMetadataWrapper wrapper = new LinkMetadataWrapper(stoplist);
           wrapper.setFeatures(attributes);
           linkClassifier= new LinkClassifierBreadthSearch(wrapper,attributes);
       }
@@ -112,7 +112,12 @@ public class LinkClassifierFactoryImpl implements LinkClassifierFactory {
 		  linkClassifier = new LinkClassifierAuthority();
 	  }
 	  if(className.indexOf("LinkClassifierImpl") != -1){
-    	  LMClassifier lnClassifier = LMClassifier.create(featureFilePath, modelFilePath, stoplist);
+		  LMClassifier lnClassifier = null;
+		  try{
+	    	  lnClassifier = LMClassifier.create(featureFilePath, modelFilePath, stoplist);
+		  } catch(IOException e){
+			  logger.info("No featureFile or modelFile for LinkClassifier. Using Baseline until LinkClassifier is trained by OnlineLearning.");
+		  }
     	  linkClassifier = new LinkClassifierImpl(lnClassifier);  
       }
 	  if(className.indexOf("MaxDepthLinkClassifier") != -1){
@@ -121,8 +126,8 @@ public class LinkClassifierFactoryImpl implements LinkClassifierFactory {
 	  return linkClassifier;  
   }
   
-  public static LinkNeighborhoodWrapper loadWrapper(String[] attributes, StopList stoplist) {
-      LinkNeighborhoodWrapper wrapper = new LinkNeighborhoodWrapper(stoplist);
+  public static LinkMetadataWrapper loadWrapper(String[] attributes, StopList stoplist) {
+      LinkMetadataWrapper wrapper = new LinkMetadataWrapper(stoplist);
       wrapper.setFeatures(attributes);
       return wrapper;
   }
@@ -130,7 +135,7 @@ public class LinkClassifierFactoryImpl implements LinkClassifierFactory {
   
   public static LinkClassifier createLinkClassifierImpl(String[] attributes, String[] classValues, Classifier classifier, String className, int levels) throws IOException {
 	  LinkClassifier linkClassifier = null;
-	  LinkNeighborhoodWrapper wrapper = loadWrapper(attributes, stoplist);
+	  LinkMetadataWrapper wrapper = loadWrapper(attributes, stoplist);
 	  weka.core.FastVector vectorAtt = new weka.core.FastVector();
 	  for (int i = 0; i < attributes.length; i++) {
 		  vectorAtt.addElement(new weka.core.Attribute(attributes[i]));

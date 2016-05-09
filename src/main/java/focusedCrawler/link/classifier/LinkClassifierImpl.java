@@ -68,6 +68,40 @@ public class LinkClassifierImpl implements LinkClassifier{
   }
 
   public LinkRelevance classify(LinkMetadata lm, int type) throws LinkClassifierException {
+	  // if not yet trained, use the baseline classifier
+	  if(lmClassifier==null){
+		  return classifyBaseline(lm,type);
+	  }
+	  
+	  LinkRelevance linkRel = null;
+	  try {
+		  double[] prob = lmClassifier.classify(lm);
+		  int classificationResult = -1;
+		  double maxProb = -1;
+		  for (int i = 0; i < prob.length; i++) {
+			  if(prob[i] > maxProb){
+				  maxProb = prob[i];
+				  classificationResult = i;
+			  }
+		  }
+		  double probability = prob[classificationResult]*100;
+		  if(probability == 100){
+			  probability = 99;
+		  }
+		  classificationResult = weights[classificationResult];
+		  double result = (classificationResult * intervalRandom) + probability ;  	
+		  linkRel = new LinkRelevance(lm.getUrl(),type,result);
+	  }catch (MalformedURLException ex) {
+		  ex.printStackTrace();
+		  throw new LinkClassifierException(ex.getMessage());
+	  }catch (Exception ex) {
+		  ex.printStackTrace();
+		  throw new LinkClassifierException(ex.getMessage());
+	  }
+	  return linkRel;
+  }
+  
+  public LinkRelevance classifyBaseline(LinkMetadata lm, int type) throws LinkClassifierException {
 
 	  LinkRelevance linkRel = null;
 	  try {
