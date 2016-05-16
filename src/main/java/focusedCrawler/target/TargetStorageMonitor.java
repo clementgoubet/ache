@@ -1,12 +1,12 @@
 package focusedCrawler.target;
 
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import focusedCrawler.target.model.Page;
-
-import java.lang.String;
-import java.io.*;
 
 public class TargetStorageMonitor {
     
@@ -14,16 +14,21 @@ public class TargetStorageMonitor {
     private PrintWriter fRelevantPages;
     private PrintWriter fNonRelevantPages;
     private PrintWriter fHarvestInfo;
+    private PrintWriter fStatistics;
     
     private List<String> crawledUrls = new ArrayList<String>(); 
     private List<String> relevantUrls = new ArrayList<String>();
     private List<String> nonRelevantUrls = new ArrayList<String>();
     private List<String> harvestRates = new ArrayList<String>();
+    private List<String> statistics = new ArrayList<String>();
+    private HashSet<String> domains = new HashSet<String>();
+    private String onionRegex = "^[a-z0-9]{16}\\.onion";
 
     private TargetStorageConfig config;
 
     int totalOnTopicPages = 0;
     private int totalOfPages = 0;
+    private int numDifferentDomains = 0;
     
     public TargetStorageMonitor(String dataPath, TargetStorageConfig config) {
         
@@ -35,12 +40,15 @@ public class TargetStorageMonitor {
         String fileRelevantPages = dataPath + "/data_monitor/relevantpages.csv";
         String fileHarvestInfo = dataPath + "/data_monitor/harvestinfo.csv";
         String fileNonRelevantPages = dataPath + "/data_monitor/nonrelevantpages.csv";
+        String fileStatistics = dataPath + "/data_monitor/statistics.csv";
+
         
         try {
             fCrawledPages = new PrintWriter(fileCrawledPages, "UTF-8");
             fRelevantPages = new PrintWriter(fileRelevantPages, "UTF-8");
             fHarvestInfo = new PrintWriter(fileHarvestInfo, "UTF-8");
             fNonRelevantPages = new PrintWriter(fileNonRelevantPages, "UTF-8");
+            fStatistics = new PrintWriter(fileStatistics, "UTF-8");
         } catch (Exception e) {
             throw new IllegalStateException("Problem while opening files to export target metrics", e);
         }
@@ -50,6 +58,15 @@ public class TargetStorageMonitor {
         
         totalOfPages++;
         
+        String domain = page.getURL().getHost();
+        if(domain.matches(onionRegex)){
+        	domain = domain.split(".onion")[0];
+        	if(domains.add(domain))
+        		numDifferentDomains++;
+        }
+        
+        
+
         crawledUrls.add(page.getIdentifier() + "\t" +
                         String.valueOf(System.currentTimeMillis() / 1000L));
         
@@ -64,6 +81,13 @@ public class TargetStorageMonitor {
             nonRelevantUrls.add(page.getIdentifier() + "\t" + String.valueOf(prob) + "\t" + String.valueOf(System.currentTimeMillis() / 1000L));
         }
         
+        statistics.add(String.valueOf(System.currentTimeMillis() / 1000L)+"\t"+
+ 			   page.getIdentifier()+"\t"+
+ 			   String.valueOf(totalOfPages)+"\t"+
+ 			   String.valueOf(totalOnTopicPages)+"\t"+
+ 			   String.valueOf(numDifferentDomains));
+ 
+        
         if (config.isRefreshSync()){
           if(totalOnTopicPages % config.getRefreshFreq() == 0) {
                exportHarvestInfo(harvestRates);
@@ -74,6 +98,8 @@ public class TargetStorageMonitor {
                relevantUrls.clear();
                exportNonRelevantPages(nonRelevantUrls);
                nonRelevantUrls.clear();
+               exportStatistics(statistics);
+               statistics.clear();
           }
         } else{
             if(totalOfPages % config.getHarvestInfoRefreshFrequency() == 0) {
@@ -90,6 +116,9 @@ public class TargetStorageMonitor {
 
                 exportNonRelevantPages(nonRelevantUrls);
                 nonRelevantUrls.clear();
+                
+                exportStatistics(statistics);
+                statistics.clear();
             }
         }
         
@@ -116,6 +145,10 @@ public class TargetStorageMonitor {
 
     private void exportNonRelevantPages(List<String> list) {
         export(list, this.fNonRelevantPages);
+    }
+    
+    private void exportStatistics(List<String> list) {
+        export(list, this.fStatistics);
     }
 
     public int getTotalOfPages() {
