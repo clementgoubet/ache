@@ -23,18 +23,19 @@
 */
 package focusedCrawler.link.classifier;
 
-import focusedCrawler.link.classifier.builder.LinkMetadataWrapper;
-import focusedCrawler.util.ParameterFile;
-import focusedCrawler.util.string.StopListArquivo;
-import focusedCrawler.util.string.StopList;
-import weka.core.Instances;
-import weka.classifiers.Classifier;
-
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import focusedCrawler.link.classifier.builder.LinkMetadataWrapper;
+import focusedCrawler.util.ParameterFile;
+import focusedCrawler.util.string.StopList;
+import focusedCrawler.util.string.StopListArquivo;
+import weka.classifiers.Classifier;
+import weka.core.Instances;
 
 
 /**
@@ -112,13 +113,20 @@ public class LinkClassifierFactoryImpl implements LinkClassifierFactory {
 		  linkClassifier = new LinkClassifierAuthority();
 	  }
 	  if(className.indexOf("LinkClassifierImpl") != -1){
-		  LMClassifier lnClassifier = null;
-		  try{
-	    	  lnClassifier = LMClassifier.create(featureFilePath, modelFilePath, stoplist);
-		  } catch(IOException e){
-			  logger.info("No featureFile or modelFile for LinkClassifier. Using Baseline until LinkClassifier is trained by OnlineLearning.");
+		  File f1 = new File(featureFilePath);
+		  File f2 = new File(modelFilePath);
+		  if(f1.exists() && f2.exists()){
+			  LMClassifier lnClassifier = null;
+			  try{
+		    	  lnClassifier = LMClassifier.create(featureFilePath, modelFilePath, stoplist);
+			  } catch(IOException e){
+				  logger.info("No featureFile or modelFile for LinkClassifier. Using Baseline until LinkClassifier is trained by OnlineLearning.");
+			  }
+	    	  linkClassifier = new LinkClassifierImpl(lnClassifier);
 		  }
-    	  linkClassifier = new LinkClassifierImpl(lnClassifier);  
+		  else{
+			  linkClassifier= new LinkClassifierBaseline();
+		  }
       }
 	  if(className.indexOf("MaxDepthLinkClassifier") != -1){
 	      linkClassifier = new MaxDepthLinkClassifier(1);

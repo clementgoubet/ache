@@ -31,6 +31,9 @@ import java.util.HashSet;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import focusedCrawler.link.backlink.BacklinkSurfer;
 import focusedCrawler.link.classifier.LinkClassifier;
 import focusedCrawler.link.classifier.LinkClassifierException;
@@ -48,6 +51,9 @@ import focusedCrawler.util.parser.PaginaURL;
  */
 
 public class BipartiteGraphManager {
+	
+	public static final Logger logger = LoggerFactory.getLogger(LinkStorage.class);
+
 
 	private FrontierManager frontierManager;
 	
@@ -190,29 +196,22 @@ public class BipartiteGraphManager {
 		LinkMetadata[] links = rep.getBacklinksLM(url);
 		if(links == null || (links != null && links.length < 10)){
 			links = surfer.getLMBacklinks(url);	
-
 		}
 		if(links != null && links.length > 0){
-			LinkRelevance[] linksRelevance = new LinkRelevance[links.length];
+			ArrayList<LinkRelevance> linksRelevance = new ArrayList<>();
 			for (int i = 0; i < links.length; i++){
-				if(links[i] != null){
-					// TITLE TOKENISING MUST BE DOE SOMEWHERE
-					/*LinkMetadata lm = new LinkMetadata(new URL(links[i].getUrl()));
-					String title = links[i].getBacklinkTitle();
-					if(title != null){
-						StringTokenizer tokenizer = new StringTokenizer(title," ");
-						Vector<String> anchorTemp = new Vector<String>();
-						while(tokenizer.hasMoreTokens()){
-							 anchorTemp.add(tokenizer.nextToken());
-			   		  	}
-			   		  	String[] aroundArray = new String[anchorTemp.size()];
-			   		  	anchorTemp.toArray(aroundArray);
-			   		  	lm.setAround(aroundArray);
-					}*/
-					linksRelevance[i] = backlinkForwardClassifier.classify(links[i],LinkRelevance.TYPE_BACKLINK_FORWARD);
+				try{
+					if(links[i] != null){
+						linksRelevance.add(backlinkForwardClassifier.classify(links[i],LinkRelevance.TYPE_BACKLINK_FORWARD));
+					}
+				}catch(LinkClassifierException e){
+					// we prevent from stopping in the middle of the loop
+					logger.info(e.getMessage());
 				}
 			}
-			frontierManager.insert(linksRelevance,Frontier.LINK_FRONTIER_ID);
+			LinkRelevance[] tempLinkRelevance = new LinkRelevance[linksRelevance.size()];
+			linksRelevance.toArray(tempLinkRelevance);
+			frontierManager.insert(tempLinkRelevance,Frontier.LINK_FRONTIER_ID);
 			
 			URL normalizedURL = new URL(url.getProtocol(), url.getHost(), "/"); 
 			rep.insertBacklinks(normalizedURL, links);

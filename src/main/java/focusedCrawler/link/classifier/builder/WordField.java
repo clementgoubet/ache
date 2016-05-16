@@ -51,8 +51,14 @@ public class WordField implements Serializable {
   public static final int ANCHOR = 3;
 
   public static final int SRC = 4;
-
-  public static final String[] FIELD_NAMES = new String[]{"URL","ALT","AROUND","ANCHOR","SRC"};
+  
+  public static final int CONTENT = 5;
+  
+  public static final int TITLE = 6;
+  
+  public static final int SNIPPET = 7;
+  
+  public static final String[] FIELD_NAMES = new String[]{"URL","ALT","AROUND","ANCHOR","SRC","CONTENT","TITLE","SNIPPET"};
 
   public WordField(int field, String word) {
     this.field = field;

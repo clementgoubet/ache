@@ -61,6 +61,24 @@ public class BipartiteGraphRepository {
 		return url;
 	}
 	
+	public String[] getChildren(String url){
+		String[] ids =  getOutlinkIDs(getID(url));
+		String[] urls = new String[ids.length];
+		for(int i=0; i< ids.length; i++){
+			urls[i]=nodeID.get(ids[i]).getUrl();
+		}
+		return urls;
+	}
+	
+	public String[] getParents(String url){
+		String[] ids =  getBacklinkIDs(getID(url));
+		String[] urls = new String[ids.length];
+		for(int i=0; i< ids.length; i++){
+			urls[i]=nodeID.get(ids[i]).getUrl();
+		}
+		return urls;
+	}
+	
 	public String[] getOutlinkIDs(String id){
 		String links = childrenGraph.get(id);
 		if(links != null){
@@ -311,6 +329,7 @@ public class BipartiteGraphRepository {
 	
 	// WARNING: as implemented, Metadata is not updated if the edge in the graph already exists
 	public void insertBacklinks(URL url, LinkMetadata[] links) throws IOException{
+
 		String urlId = getId(url.toString());
 		String strCurrentLinks = parentsGraph.get(urlId);
 		HashSet<String> currentLinks = parseRecordBacklink(strCurrentLinks);

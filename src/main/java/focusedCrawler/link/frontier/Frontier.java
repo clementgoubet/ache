@@ -174,11 +174,11 @@ public class Frontier {
         boolean inserted = false;
         String url = linkRelev.getURL().toString();
         Integer rel = exist(linkRelev);
+
         if (rel == null && url.toString().length() < 210) {
             urlRelevance.put(url, linkRelev);
             inserted = true;
         }
-
 
         return inserted;
     }

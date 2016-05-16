@@ -28,8 +28,8 @@ public class BipartiteGraphRepositoryTest {
     	URL urlBacklink = new URL("http://urlBacklink.com");
     	String[] anchor1 = new String[]{"words","of","anchor","1"};
     	String[] anchor2 = new String[]{"words","of","anchor","2"};
-    	String pageContent = "<!DOCTYPE html><html><body><h1>My Parent Heading</h1><p>My first paragraph.</p></body></html>";
-    	String pageContent1 = "<!DOCTYPE html><html><body><h1>My Child 1 Heading</h1><p>My first paragraph.</p></body></html>";
+    	String[] pageContent = {"My","Parent","Heading","My","first","paragraph"};
+    	String[] pageContent1 = {"My","Child","1","Heading","My","first","paragraph"};
     	String title = "Backlink Title";
     	String snippet = "Backlink Snippet";
     	

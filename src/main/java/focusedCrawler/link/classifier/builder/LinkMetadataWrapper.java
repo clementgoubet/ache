@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import focusedCrawler.link.LinkMetadata;
+import focusedCrawler.link.frontier.LinkRelevance;
 import focusedCrawler.target.model.Page;
 import focusedCrawler.util.parser.PaginaURL;
 import focusedCrawler.util.string.PorterStemmer;
@@ -145,6 +146,68 @@ public class LinkMetadataWrapper {
 	  HashMap<String, WordField[]> linkFields = extractLinksFull(linkMetadata);
 	  return mapFeatures(linkFields, features);
   }
+  
+  public HashMap<String, Instance> extractData(LinkMetadata lm, String[] features, int type) throws MalformedURLException {
+	   HashMap<String, Instance> result = new HashMap<String, Instance>();
+	   Instance instance = new Instance(features);
+	   String urlStr = lm.getUrl();
+
+	   if(type == LinkRelevance.TYPE_FORWARD){
+		   FrequencyMap anchorFm = new FrequencyMap("anchor",stoplist,stemmer,null);
+		   FrequencyMap aroundFm = new FrequencyMap("anchor",stoplist,stemmer,null);
+		   FrequencyMap urlFm = new FrequencyMap("url",stoplist,stemmer,null);
+		   urlFm.addWords(getURLWords(urlStr));
+	 	   anchorFm.addWords(lm.getAnchor(), features);
+	 	   aroundFm.addWords(lm.getAround(), features);
+//	 	   System.out.println("EXTRACT DATA: "+anchorFm.toString());
+//	 	   System.out.println("EXTRACT DATA: "+aroundFm.toString());
+//	 	   System.out.println("EXTRACT DATA: "+urlFm.toString());
+	 	   for(WordFrequency wf : anchorFm.getMap().values()){
+	 		   instance.setValue(wf.getWord(), (double) wf.getFrequency());
+	 	   }
+	 	   for(WordFrequency wf : aroundFm.getMap().values()){
+	 		   instance.setValue(wf.getWord(), (double) wf.getFrequency());
+	 	   }
+	 	   for(WordFrequency wf : urlFm.getMap().values()){
+	 		   instance.setValue(wf.getWord(), (double) wf.getFrequency());
+	 	   }
+	   }
+	   else if(type == LinkRelevance.TYPE_BACKLINK_BACKWARD){
+		   FrequencyMap contentFm = new FrequencyMap("content",stoplist,stemmer,null);
+		   FrequencyMap urlFm = new FrequencyMap("url",stoplist,stemmer,null);
+		   urlFm.addWords(getURLWords(urlStr));
+		   contentFm.addWords(lm.getPageContent(), features);
+	 	   for(WordFrequency wf : contentFm.getMap().values()){
+	 		   instance.setValue(wf.getWord(), (double) wf.getFrequency());
+	 	   }
+	 	   for(WordFrequency wf : urlFm.getMap().values()){
+	 		   instance.setValue(wf.getWord(), (double) wf.getFrequency());
+	 	   }
+	   }
+	   else if(type == LinkRelevance.TYPE_BACKLINK_FORWARD){
+		   FrequencyMap titleFm = new FrequencyMap("title",stoplist,stemmer,null);
+		   FrequencyMap snippetFm = new FrequencyMap("snippet",stoplist,stemmer,null);
+		   FrequencyMap urlFm = new FrequencyMap("url",stoplist,stemmer,null);
+		   urlFm.addWords(getURLWords(urlStr));
+		   titleFm.addWords(lm.getSearchEngineTitleAsArray(), features);
+		   snippetFm.addWords(lm.getSearchEngineSnippetAsArray(), features);
+	 	   for(WordFrequency wf : titleFm.getMap().values()){
+	 		   instance.setValue(wf.getWord(), (double) wf.getFrequency());
+	 	   }
+	 	   for(WordFrequency wf : snippetFm.getMap().values()){
+	 		   instance.setValue(wf.getWord(), (double) wf.getFrequency());
+	 	   }
+	 	   for(WordFrequency wf : urlFm.getMap().values()){
+	 		   instance.setValue(wf.getWord(), (double) wf.getFrequency());
+	 	   }
+	   }
+	   else{
+		   throw new IllegalArgumentException("type "+type+" unsupported");
+	   }
+	   result.put(urlStr,instance);
+	   return result;
+
+  }
 
   private HashMap<String, Instance> mapFeatures(HashMap<String, WordField[]> linkFields, String[] features){
     HashMap<String, Instance> result = new HashMap<String, Instance>();
@@ -256,7 +319,6 @@ public class LinkMetadataWrapper {
     	return result;
     }
 
-    
    private  HashMap<String, WordField[]> extractLinks(LinkMetadata lm) throws MalformedURLException {
 	   HashMap<String, WordField[]> result = new HashMap<String, WordField[]>();
 	   List<WordField> words = new ArrayList<WordField>();
@@ -366,6 +428,25 @@ public class LinkMetadataWrapper {
 	  for (int i = 0; i < terms.length; i++) {
 		  wordsFields.add(new WordField(WordField.URLFIELD,stemming(terms[i])));
 	  }
+  }
+  
+  private String[] getURLWords(String urlStr) throws  MalformedURLException {
+	  URL url = new URL(urlStr);
+	  ArrayList<String> temp = new ArrayList<>();
+	  String host = url.getHost();
+	  int index = host.lastIndexOf(".");
+	  if(index != -1){
+		  host = "host_" + host.substring(index+1);  
+		  temp.add(host);
+	  }
+	  PaginaURL pageParser = new PaginaURL(url,url.getFile(), stoplist);
+	  String[] terms = pageParser.palavras();
+	  for (int i = 0; i < terms.length; i++) {
+		  temp.add(stemming(terms[i]));
+	  }
+	  String[] result = new String[temp.size()];
+	  temp.toArray(result);
+	  return result;
   }
 
 }

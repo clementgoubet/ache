@@ -24,6 +24,8 @@
 package focusedCrawler.link.classifier;
 
 import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Random;
 
 import focusedCrawler.link.LinkMetadata;
 import focusedCrawler.link.frontier.LinkRelevance;
@@ -49,10 +51,12 @@ public class LinkClassifierImpl implements LinkClassifier{
 	private int[] weights;
 	private int intervalRandom = 100;
 	private LMClassifier lmClassifier;
+	private Random randomGenerator;
 
 	public LinkClassifierImpl(LMClassifier lmClassifier) {
 		this.weights = new int[]{2,1,0};
 		this.lmClassifier = lmClassifier;
+		this.randomGenerator = new Random();
 	}
 
   /**
@@ -69,13 +73,19 @@ public class LinkClassifierImpl implements LinkClassifier{
 
   public LinkRelevance classify(LinkMetadata lm, int type) throws LinkClassifierException {
 	  // if not yet trained, use the baseline classifier
-	  if(lmClassifier==null){
+	  if(lmClassifier==null || lm == null){
 		  return classifyBaseline(lm,type);
 	  }
 	  
 	  LinkRelevance linkRel = null;
 	  try {
-		  double[] prob = lmClassifier.classify(lm);
+		  double[] prob;
+		  try{
+			  prob = lmClassifier.classify(lm,type);
+		  }catch(Exception ex){
+			  ex.printStackTrace();
+			  throw new LinkClassifierException(ex.getMessage());
+		  }
 		  int classificationResult = -1;
 		  double maxProb = -1;
 		  for (int i = 0; i < prob.length; i++) {
@@ -103,32 +113,19 @@ public class LinkClassifierImpl implements LinkClassifier{
   
   public LinkRelevance classifyBaseline(LinkMetadata lm, int type) throws LinkClassifierException {
 
-	  LinkRelevance linkRel = null;
-	  try {
-		  double[] prob = lmClassifier.classify(lm);
-		  int classificationResult = -1;
-		  double maxProb = -1;
-		  for (int i = 0; i < prob.length; i++) {
-			  if(prob[i] > maxProb){
-				  maxProb = prob[i];
-				  classificationResult = i;
-			  }
-		  }
-		  double probability = prob[classificationResult]*100;
-		  if(probability == 100){
-			  probability = 99;
-		  }
-		  classificationResult = weights[classificationResult];
-		  double result = (classificationResult * intervalRandom) + probability ;  	
-		  linkRel = new LinkRelevance(lm.getUrl(),type,result);
-	  }catch (MalformedURLException ex) {
-		  ex.printStackTrace();
-		  throw new LinkClassifierException(ex.getMessage());
-	  }catch (Exception ex) {
-		  ex.printStackTrace();
-		  throw new LinkClassifierException(ex.getMessage());
-	  }
-	  return linkRel;
+	  double relevance = 100 + randomGenerator.nextInt(100);
+		try {
+			if(lm != null && lm.getUrl() != null){
+				return new LinkRelevance(new URL(lm.getUrl()), type, relevance);
+			}
+			else if(lm != null && lm.getBacklinkUrls().size()>0){
+				return new LinkRelevance(new URL(lm.getBacklinkUrls().elementAt(0)), type, relevance);
+			}
+			else
+				return null;
+		} catch (MalformedURLException e) {
+			throw new LinkClassifierException(e.getMessage(), e);
+		}
   }
   
   public LinkRelevance[] classify(LinkMetadata[] lms, int type) throws LinkClassifierException{

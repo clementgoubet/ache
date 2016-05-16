@@ -24,8 +24,8 @@
 package focusedCrawler.link.classifier.builder;
 
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Vector;
 import java.util.HashSet;
 
 
@@ -41,24 +41,24 @@ public class FilterData {
 		this.maxWordSize = maxWordSize;
 	}
 
-	public Vector<WordFrequency> filter(Vector<WordFrequency> sortList, Vector<WordFrequency> aroundWords){
+	public ArrayList<WordFrequency> filter(ArrayList<WordFrequency> sortList, ArrayList<WordFrequency> aroundWords){
 
 		//System.out.println("SIZE OF sortList" + sortList.size());
 		boolean stem = aroundWords != null;
-		Vector<WordFrequency> filteredWords = new Vector<>();
+		ArrayList<WordFrequency> filteredWords = new ArrayList<>();
 		int minFreq = 5;
 		int count = 0;
 		int i = 0;
-		int maxFreq = ((WordFrequency)sortList.firstElement()).getFrequency();
+		int maxFreq = ((WordFrequency)sortList.get(0)).getFrequency();
 		if(maxFreq <= 10){
 			minFreq = 1;
 		}
 		while (i < sortList.size() && (count < maxElements || stem)) {
-			WordFrequency wordFrequency = (WordFrequency)sortList.elementAt(i);
+			WordFrequency wordFrequency = (WordFrequency)sortList.get(i);
 			String word = wordFrequency.getWord();
 			int frequency = wordFrequency.getFrequency();
 			if(word.length() > maxWordSize){
-				if(frequency > minFreq){
+				if(frequency >= minFreq){
 					filteredWords.add(wordFrequency);
 					count++;
 				}
@@ -66,10 +66,10 @@ public class FilterData {
 			i++;
 		}
 		if(stem){
-		    Vector<WordFrequency> stemmedWords =  stemming(filteredWords, aroundWords, sortList);
-		    Vector<WordFrequency> result = new Vector<>();
+			ArrayList<WordFrequency> stemmedWords =  stemming(filteredWords, aroundWords, sortList);
+			ArrayList<WordFrequency> result = new ArrayList<>();
 			for (int j = 0; j < maxElements && j < stemmedWords.size(); j++) {
-				result.add(stemmedWords.elementAt(j));
+				result.add(stemmedWords.get(j));
 			}
 			return result;
 		}else{
@@ -77,13 +77,13 @@ public class FilterData {
 		}
 	}
 	
-	public Vector<WordFrequency> filter(Vector<WordFrequency> sortList){
-	    Vector<WordFrequency> filteredWords = new Vector<>();
+	public ArrayList<WordFrequency> filter(ArrayList<WordFrequency> sortList){
+	    ArrayList<WordFrequency> filteredWords = new ArrayList<>();
 		int count = 0;
 		int i = 0;
 		
 		while (i < sortList.size() && count < maxElements) {
-			WordFrequency wordFrequency = (WordFrequency)sortList.elementAt(i);
+			WordFrequency wordFrequency = (WordFrequency)sortList.get(i);
 			String word = wordFrequency.getWord();
 			
 			if(word.length() > maxWordSize){
@@ -95,17 +95,17 @@ public class FilterData {
 		return stemming(filteredWords, null, sortList);
 	}
 
-	private Vector<WordFrequency> stemming(Vector<WordFrequency> wordFreqList, Vector<WordFrequency> aroundWords, Vector<WordFrequency> initialList){
-	    Vector<WordFrequency> finalWords = new Vector<>();
+	private ArrayList<WordFrequency> stemming(ArrayList<WordFrequency> wordFreqList, ArrayList<WordFrequency> aroundWords, ArrayList<WordFrequency> initialList){
+	    ArrayList<WordFrequency> finalWords = new ArrayList<>();
 		HashSet<String> usedWords = new HashSet<>();
 		if(aroundWords != null){
 			for (int i = 0; i < aroundWords.size(); i++) {
 				boolean exist = false;
-				WordFrequency firstWordFreq = (WordFrequency)aroundWords.elementAt(i);
+				WordFrequency firstWordFreq = (WordFrequency)aroundWords.get(i);
 				String word = firstWordFreq.getWord();
 				firstWordFreq = new WordFrequency(word,0);
 				for (int j = 0; j < wordFreqList.size(); j++) {
-					WordFrequency wordFreqTemp = (WordFrequency) wordFreqList.elementAt(j);
+					WordFrequency wordFreqTemp = (WordFrequency) wordFreqList.get(j);
 					if(word.equals(wordFreqTemp.getWord())){
 						exist = true;
 						break;
@@ -123,7 +123,7 @@ public class FilterData {
 		}
 		Collections.sort(wordFreqList, new WordSizeComparator());
 		for (int i = 0; i < wordFreqList.size(); i++) {
-			WordFrequency firstWordFreq = (WordFrequency)wordFreqList.elementAt(i);
+			WordFrequency firstWordFreq = (WordFrequency)wordFreqList.get(i);
 			String word = firstWordFreq.getWord();
 			if(word != null &&
 					(usedWords.contains(word) ||
@@ -133,7 +133,7 @@ public class FilterData {
 			}
 			if(word != null){
 				for (int j = 0; j < initialList.size(); j++) {
-					WordFrequency wordFreqTemp = (WordFrequency) initialList.elementAt(j);
+					WordFrequency wordFreqTemp = (WordFrequency) initialList.get(j);
 					if (wordFreqTemp.getWord() != null &&
 							wordFreqTemp.getWord().indexOf(word) != -1) {
 						usedWords.add(wordFreqTemp.getWord());

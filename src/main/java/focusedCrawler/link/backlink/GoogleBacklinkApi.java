@@ -1,6 +1,8 @@
 package focusedCrawler.link.backlink;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -21,7 +23,8 @@ public class GoogleBacklinkApi implements BacklinkApi {
         String backlink = "https://www.google.com/search?q=link:" + host + "&num=21";
 
         try {
-            URLConnection connection = new URL(backlink).openConnection();
+        	Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("localhost",8118));
+            URLConnection connection = new URL(backlink).openConnection(proxy);
             connection.setRequestProperty("User-Agent", userAgent);
             connection.connect();
     

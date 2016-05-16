@@ -91,6 +91,10 @@ public class LinkClassifierBaseline implements LinkClassifier{
   		double relevance = 100 + randomGenerator.nextInt(100);
   		try {
   			if(lm != null && lm.getUrl() != null){
+  				if(type==LinkRelevance.TYPE_BACKLINK_BACKWARD){
+  					if(lm.getPageRelevance()>0.5)// it is better to backlink relevant pages than others
+  						relevance += 70;
+  				}
   				return new LinkRelevance(new URL(lm.getUrl()), type, relevance);
   			}
   			else if(lm != null && lm.getBacklinkUrls().size()>0){

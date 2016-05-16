@@ -2,6 +2,8 @@ package focusedCrawler.link;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -21,7 +23,7 @@ public class LinkMetadata {
 	private boolean isPageInfoSet;
 	
 	@JsonProperty("page_content")
-	private String pageContent;
+	private String[] pageContent;
 	
 	@JsonProperty("page_relevance")
 	private int pageRelevance;
@@ -139,7 +141,7 @@ public class LinkMetadata {
 		this.backlinkSnippets = backlinkSnippets;
 	}
 	
-	public void setPageContent(String pageContent){
+	public void setPageContent(String[] pageContent){
 		this.pageContent = pageContent;
 	}
 	
@@ -182,7 +184,7 @@ public class LinkMetadata {
 		return url;
 	}
 	
-	public String getPageContent(){
+	public String[] getPageContent(){
 		return pageContent;
 	}
 	
@@ -294,6 +296,34 @@ public class LinkMetadata {
 		return backlinkSnippets;
 	}
 	
+	public String[] getSearchEngineTitleAsArray(){
+		// TITLE TOKENISING MUST BE DONE SOMEWHERE
+		if(searchEngineTitle != null){
+			StringTokenizer tokenizer = new StringTokenizer(searchEngineTitle," ");
+			ArrayList<String> titleTemp = new ArrayList<String>();
+			while(tokenizer.hasMoreTokens()){
+				titleTemp.add(tokenizer.nextToken());
+   		  	}
+   		  	String[] titleArray = new String[titleTemp.size()];
+   		  	titleTemp.toArray(titleArray);
+   		  	return titleArray;
+		}
+		return null;
+	}
+	
+	public String[] getSearchEngineSnippetAsArray(){
+		if(searchEngineSnippet != null){
+			StringTokenizer tokenizer = new StringTokenizer(searchEngineSnippet," ");
+			ArrayList<String> snippetTemp = new ArrayList<String>();
+			while(tokenizer.hasMoreTokens()){
+				snippetTemp.add(tokenizer.nextToken());
+   		  	}
+   		  	String[] snippetArray = new String[snippetTemp.size()];
+   		  	snippetTemp.toArray(snippetArray);
+   		  	return snippetArray;
+		}
+		return null;
+	}
 	
 	// other functions
 	public LinkMetadata clone(){
@@ -325,8 +355,13 @@ public class LinkMetadata {
 		String result = "";
 		result += "\turl: "+url+"\n";
 		result += "\tisPageInfoSet: "+isPageInfoSet+"\n";
-		result += "\tpageContent: "+pageContent+"\n";
-		result += "\tpageRelevance: "+pageRelevance+"\n";
+		result += "\tpageContent: ";
+		if(pageContent!=null){
+			for(int i=0; i<pageContent.length;i++){
+				result += pageContent[i]+" ";
+			}
+		}
+		result += "\n\tpageRelevance: "+pageRelevance+"\n";
 		result += "\tisTargetOfBacklink: "+isTargetOfBacklink+"\n";
 		result += "\tbacklinkUrls: ";
 		for(int i=0; i<backlinkUrls.size();i++){

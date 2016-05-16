@@ -175,7 +175,7 @@ public class Page implements Serializable {
     @JsonIgnore
     public LinkMetadata getLinkMetadata(){
         LinkMetadata lm = new LinkMetadata(url.toString());
-        lm.setPageContent(content);
+        lm.setPageContent(pageURL.palavras());
         lm.setPageRelevance((int)relevance);
         return lm;
     }

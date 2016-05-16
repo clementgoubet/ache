@@ -73,8 +73,6 @@ public class LinkStorage extends StorageDefault{
 
   private int numberOfPages = 0;
 
-  private int numberOfBacklink = 0;
-
   private long totalTime = 0;
   
   private boolean getBacklinks = false;
@@ -160,8 +158,8 @@ public class LinkStorage extends StorageDefault{
             }
             
             if (onlineLearning != null && numberOfPages % learnLimit == 0) {
-                logger.info("RUNNING ONLINE LEARNING...");
-                onlineLearning.execute();
+				logger.info("RUNNING ONLINE LEARNING...");
+                onlineLearning.execute(getOutlinks, getBacklinks);
                 frontierManager.clearFrontier();
             }
             
@@ -194,7 +192,8 @@ public class LinkStorage extends StorageDefault{
      * This method sends a link to crawler
      * @throws DataNotFoundException 
      */
-    public synchronized Object select(Object obj) throws StorageException, DataNotFoundException {
+    @SuppressWarnings("finally")
+	public synchronized Object select(Object obj) throws StorageException, DataNotFoundException {
         try {
             LinkRelevance nextURL = frontierManager.nextURL();
             if(nextURL == null) {
@@ -210,9 +209,10 @@ public class LinkStorage extends StorageDefault{
                 } catch (IOException ex) {
                     logger.info("An IOException occurred.", ex);
                     throw new StorageException(ex.getMessage(), ex);
-                }
-            	// recursive call to get the next URL to be fed to the downloader
-            	return this.select(obj);
+                } finally{
+                	// recursive call to get the next URL to be fed to the downloader
+            		return this.select(obj);
+            	}
             }
             else if(nextURL.getType()!=LinkRelevance.TYPE_FORWARD && nextURL.getType()!=LinkRelevance.TYPE_BACKLINK_FORWARD){
             	throw new IllegalArgumentException("gestion of type not yet implemented");
@@ -266,7 +266,7 @@ public class LinkStorage extends StorageDefault{
             StopList stoplist = new StopListArquivo(stoplistFile);
             LinkMetadataWrapper wrapper = new LinkMetadataWrapper(stoplist);
             
-            LinkClassifierBuilder cb = new LinkClassifierBuilder(graphRep, stoplist, wrapper, frontierManager.getLinkFrontier(), frontierManager.getBacklinkFrontier());
+            LinkClassifierBuilder cb = new LinkClassifierBuilder(graphRep, stoplist, wrapper, frontierManager.getLinkFrontier(), modelPath);
             
             logger.info("ONLINE LEARNING:" + config.getOnlineMethod());
             OnlineLearning onlineLearning = new OnlineLearning(frontierManager.getLinkFrontier(), frontierManager.getBacklinkFrontier(), manager, cb, config.getOnlineMethod(), dataPath + "/" + config.getTargetStorageDirectory());

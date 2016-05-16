@@ -10,7 +10,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import focusedCrawler.link.classifier.LinkClassifier;
+import focusedCrawler.link.classifier.LinkClassifierBaseline;
+import focusedCrawler.link.classifier.LinkClassifierException;
 import focusedCrawler.link.classifier.builder.LinkClassifierBuilder;
 import focusedCrawler.link.frontier.Frontier;
 import focusedCrawler.link.frontier.LinkRelevance;
@@ -20,11 +25,14 @@ import focusedCrawler.util.vsm.VSMElement;
 
 
 public class OnlineLearning {
+	
+	public static final Logger logger = LoggerFactory.getLogger(LinkStorage.class);
+
 
 	private Frontier linkFrontier;
-
-	private Frontier backlinkFrontier;
 	
+	private Frontier backlinkFrontier;
+
 	private BipartiteGraphManager manager;
 	
 	private BipartiteGraphRepository rep;
@@ -34,7 +42,7 @@ public class OnlineLearning {
 	private String method;
 	
 	private String targetPath;
-	
+
 	public OnlineLearning(Frontier linkFrontier, Frontier backlinkFrontier, BipartiteGraphManager manager, LinkClassifierBuilder classifierBuilder, String method, String path){
 		this.linkFrontier = linkFrontier;
 		this.backlinkFrontier = backlinkFrontier;
@@ -45,9 +53,8 @@ public class OnlineLearning {
 		this.rep = manager.getRepository();
 	}
 	
-	public void execute() throws Exception{
+	public void execute(boolean getOutlinks, boolean getBacklinks) throws Exception{
 		linkFrontier.commit();
-		backlinkFrontier.commit();
 		System.out.println("COMMIT DONE");
 		if(method.equals("SALSA")){
 			runSALSA(null,false);
@@ -73,16 +80,94 @@ public class OnlineLearning {
 		if(method.equals("FORWARD_CLASSIFIER_LEVELS")){
 			forwardClassifier(loadRelSites(true),true,3);
 		}
+		if(method.equals("LINK_CLASSIFIERS_LEVELS") || method.equals("LINK_CLASSIFIERS_BINARY")){
+			if(getOutlinks){
+				if(method.equals("LINK_CLASSIFIERS_LEVELS"))
+					forwardClassifier(loadRelSites(true),true,3);
+				else
+					forwardClassifier(loadRelSites(true),true,0);
+			}
+			if(getBacklinks){
+				backlinkBackwardClassifier(loadRelSites(true),true);
+				backlinkForwardClassifier(loadRelSites(true),true);				
+			}
+
+		}
 
 		linkFrontier.commit();
-		backlinkFrontier.commit();
+	}
+	
+	private void forwardClassifier(HashSet<String> relSites, boolean updateFrontier, int levels) throws Exception{
+		System.out.println(">>>BUILDING OUTLINK CLASSIFIER...:");
+		LinkClassifier outlinkClassifier = new LinkClassifierBaseline();
+		try{
+			outlinkClassifier = classifierBuilder.forwardlinkTraining(relSites,levels, "LinkClassifierImpl");
+		} catch(LinkClassifierException e){
+			logger.info(e+"\n Switching to Baseline Classifier instead");
+		}
+		if(updateFrontier){
+			manager.setOutlinkClassifier(outlinkClassifier);
+		}
+		LinkMetadata[] outLMs = rep.getOutlinkLMs();
+		for (int i = 0; i < outLMs.length; i++) {
+			if(outLMs[i] != null){
+				LinkRelevance lr = outlinkClassifier.classify(outLMs[i], LinkRelevance.TYPE_FORWARD);
+				if(updateFrontier){
+					linkFrontier.update(lr);
+				}
+			}
+		}
+	}
+	
+	private void backlinkBackwardClassifier(HashSet<String> relSites, boolean updateFrontier) throws Exception{
+		System.out.println(">>>BUILDING BACKLINK BACKWARD CLASSIFIER...:");
+		LinkClassifier backlinkBackwardClassifier = new LinkClassifierBaseline();
+		try{
+			backlinkBackwardClassifier = classifierBuilder.backlinkBackwardTraining(relSites, "LinkClassifierImpl");
+		} catch(LinkClassifierException e){
+			logger.info(e+"\n Switching to Baseline Classifier instead");
+		}
+		if(updateFrontier){
+			manager.setBacklinkBackwardClassifier(backlinkBackwardClassifier);
+		}
+		LinkMetadata[] lms = rep.getLMs();
+		for (int i = 0; i < lms.length; i++) {
+			if(lms[i] != null && lms[i].getIsPageInfoSet()){
+				LinkRelevance lr = backlinkBackwardClassifier.classify(lms[i], LinkRelevance.TYPE_BACKLINK_BACKWARD);
+				if(updateFrontier){
+					linkFrontier.update(lr);
+				}
+			}
+		}
+	}
+	
+	private void backlinkForwardClassifier(HashSet<String> relSites, boolean updateFrontier) throws Exception{
+		System.out.println(">>>BUILDING BACKLINK FORWARD CLASSIFIER...:");
+		LinkClassifier backlinkForwardClassifier = new LinkClassifierBaseline();
+		try{
+			backlinkForwardClassifier = classifierBuilder.backlinkForwardTraining(relSites, "LinkClassifierImpl");
+		} catch(LinkClassifierException e){
+			logger.info(e+"\n Switching to Baseline Classifier instead");
+		}
+		if(updateFrontier){
+			manager.setBacklinkForwardClassifier(backlinkForwardClassifier);
+		}
+		LinkMetadata[] lms = rep.getLMs();
+		for (int i = 0; i < lms.length; i++) {
+			if(lms[i] != null && lms[i].getIsPageInfoSearchEngineSet()){
+				LinkRelevance lr = backlinkForwardClassifier.classify(lms[i], LinkRelevance.TYPE_BACKLINK_FORWARD);
+				if(updateFrontier){
+					linkFrontier.update(lr);
+				}
+			}
+		}
 	}
 	
 	private HashSet<String> loadRelSites(boolean isDir) throws IOException{
 		HashSet<String> relSites = new HashSet<String>();
 		if(isDir){
 			File[] dirs = new File(targetPath).listFiles();
-			System.out.println(">>REL SITESs");
+			System.out.println(">>REL SITES");
 			for (int i = 0; i < dirs.length; i++) {
 				File[] files = dirs[i].listFiles();
 				for (int j = 0; j < files.length; j++) {
@@ -93,6 +178,7 @@ public class OnlineLearning {
 					}
 				}
 			}
+			System.out.println(">>" + relSites.size() + " relevant pages loaded");
 		}else{
 			File file = new File(targetPath + File.separator + "entry_points");
 			try(BufferedReader input = new BufferedReader(new FileReader(file))) {
@@ -246,22 +332,6 @@ public class OnlineLearning {
 	}
 
 	
-	private void forwardClassifier(HashSet<String> relSites, boolean updateFrontier, int levels) throws Exception{
-		System.out.println(">>>BUILDING OUTLINK CLASSIFIER...:");
-		LinkClassifier outlinkClassifier = classifierBuilder.forwardlinkTraining(relSites,levels, "LinkClassifierImpl");
-		if(updateFrontier){
-			manager.setOutlinkClassifier(outlinkClassifier);
-		}
-		LinkMetadata[] outLMs = rep.getOutlinkLMs();
-		for (int i = 0; i < outLMs.length; i++) {
-			if(outLMs[i] != null){
-				LinkRelevance lr = outlinkClassifier.classify(outLMs[i], 1); // Backward compatibility note: old relevance corresponds to type 1
-				if(updateFrontier){
-					linkFrontier.update(lr);
-				}
-			}
-		}
-	}
 	
 	private HashMap<String,VSMElement> createClassifiers(HashSet<String> relSites, boolean updateFrontier) throws Exception{
 		HashMap<String,VSMElement> elems = new HashMap<String,VSMElement>();

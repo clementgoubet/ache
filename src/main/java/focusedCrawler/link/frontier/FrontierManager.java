@@ -97,7 +97,7 @@ public class FrontierManager {
     private void loadQueue(int numberOfLinks) {
 
     	// WEIGHTS SHOULD NOT BE HARDCODED
-    	int[] weights = {10,3,2};
+    	int[] weights = {500,1,1};
     	int total = weights[0];
 		if(backlinkForwardSelector != null){
 			total+=weights[1];
@@ -110,12 +110,12 @@ public class FrontierManager {
         linkFrontier.commit();
         backlinkFrontier.commit();
         Vector<LinkRelevance[]> links = new Vector<LinkRelevance[]>();
-		links.add(outlinkSelector.select(linkFrontier, LinkRelevance.TYPE_FORWARD, (int)Math.round(weights[0]*numberOfLinks/total)));
+		links.add(outlinkSelector.select(linkFrontier, LinkRelevance.TYPE_FORWARD, Math.max(1,Math.round(weights[0]*numberOfLinks/total))));
 		if(backlinkForwardSelector != null){
-			links.add(backlinkForwardSelector.select(linkFrontier, LinkRelevance.TYPE_BACKLINK_FORWARD, (int)Math.round(weights[1]*numberOfLinks/total)));
+			links.add(backlinkForwardSelector.select(linkFrontier, LinkRelevance.TYPE_BACKLINK_FORWARD, Math.max(1,Math.round(weights[1]*numberOfLinks/total))));
 		}
 		if(backlinkBackwardSelector != null){
-			links.add(backlinkBackwardSelector.select(backlinkFrontier, LinkRelevance.TYPE_BACKLINK_BACKWARD,(int)Math.round(weights[2]*numberOfLinks/total)));
+			links.add(backlinkBackwardSelector.select(backlinkFrontier, LinkRelevance.TYPE_BACKLINK_BACKWARD,Math.max(1,Math.round(weights[2]*numberOfLinks/total))));
 		}
 		for(Iterator<LinkRelevance[]> it = links.iterator(); it.hasNext();){
 			LinkRelevance[] item = it.next();
@@ -127,7 +127,7 @@ public class FrontierManager {
     }
 
     public boolean isRelevant(LinkRelevance elem, int frontierId) throws FrontierPersistentException {
-        if (elem.getRelevance() <= 0) {
+        if (elem == null || elem.getRelevance() <= 0) {
             return false;
         }
         

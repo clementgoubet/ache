@@ -31,8 +31,8 @@ public class LMClassifier {
 		this.attributes = attributes;
 	}
 	
-	public double[] classify(LinkMetadata lm) throws Exception {
-		Map<String, Instance> urlWords = wrapper.extractLinksFull(lm, attributes);
+	public double[] classify(LinkMetadata lm, int type) throws Exception {
+		Map<String, Instance> urlWords = wrapper.extractData(lm, attributes, type);
 		Iterator<String> iter = urlWords.keySet().iterator();
 		String url = iter.next();
 		Instance instance = (Instance)urlWords.get(url);

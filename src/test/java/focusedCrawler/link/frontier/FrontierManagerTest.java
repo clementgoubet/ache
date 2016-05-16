@@ -91,6 +91,8 @@ public class FrontierManagerTest {
         
         LinkRelevance nextURL = frontierManager.nextURL();
         
+        System.out.println(frontier.urlRelevance.getTable().size());
+        
         // then
         assertThat(nextURL, is(notNullValue()));
         assertThat(nextURL.getURL(), is(notNullValue()));
