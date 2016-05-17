@@ -82,6 +82,8 @@ public class LinkClassifierImpl implements LinkClassifier{
 		  double[] prob;
 		  try{
 			  prob = lmClassifier.classify(lm,type);
+		  }catch(MalformedURLException ex){
+			  return null;
 		  }catch(Exception ex){
 			  ex.printStackTrace();
 			  throw new LinkClassifierException(ex.getMessage());

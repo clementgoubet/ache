@@ -56,7 +56,7 @@ public class FrontierManagerTest {
         LinkSelector linkSelector = new SiteLinkSelector();
         frontier = new Frontier(tempFolder.newFolder().toString(), 1000, scope);
         backlinkFrontier = new Frontier(tempFolder.newFolder().toString(), 1000, scope);
-        FrontierManager frontierManager = new FrontierManager(frontier, backlinkFrontier, 2, 2, linkSelector, null, null, new LinkFilter(new ArrayList<String>()));
+        FrontierManager frontierManager = new FrontierManager(frontier, backlinkFrontier, 2, 2, linkSelector, null, null, new LinkFilter(new ArrayList<String>()),null);
         
         // when
         frontierManager.insert(link1,1);
@@ -82,7 +82,7 @@ public class FrontierManagerTest {
         LinkSelector linkSelector = new NonRandomLinkSelector();
         frontier = new Frontier(tempFolder.newFolder().toString(), 1000);
         backlinkFrontier = new Frontier(tempFolder.newFolder().toString(), 1000);
-        FrontierManager frontierManager = new FrontierManager(frontier, backlinkFrontier, 2, 2, linkSelector, null, null, emptyLinkFilter);
+        FrontierManager frontierManager = new FrontierManager(frontier, backlinkFrontier, 2, 2, linkSelector, null, null, emptyLinkFilter, null);
         
         LinkRelevance link1 = new LinkRelevance(new URL("http://www.example1.com/index.html"), LinkRelevance.DEFAULT_TYPE, 1);
         
@@ -108,7 +108,7 @@ public class FrontierManagerTest {
         LinkSelector linkSelector = new NonRandomLinkSelector();
         frontier = new Frontier(tempFolder.newFolder().toString(), 1000);
         backlinkFrontier = new Frontier(tempFolder.newFolder().toString(), 1000);
-        FrontierManager frontierManager = new FrontierManager(frontier, backlinkFrontier, 2, 2, linkSelector, null, null, emptyLinkFilter);
+        FrontierManager frontierManager = new FrontierManager(frontier, backlinkFrontier, 2, 2, linkSelector, null, null, emptyLinkFilter, null);
         
         LinkRelevance link1 = new LinkRelevance(new URL("http://www.example1.com/index.html"), LinkRelevance.DEFAULT_TYPE, 1);
         LinkRelevance link2 = new LinkRelevance(new URL("http://www.example2.com/index.html"), LinkRelevance.DEFAULT_TYPE, 2);
@@ -150,7 +150,7 @@ public class FrontierManagerTest {
         LinkSelector linkSelector = new NonRandomLinkSelector();
         frontier = new Frontier(tempFolder.newFolder().toString(), 1000);
         backlinkFrontier = new Frontier(tempFolder.newFolder().toString(), 1000);
-        FrontierManager frontierManager = new FrontierManager(frontier, backlinkFrontier, 2, 2, linkSelector, null, null, emptyLinkFilter);
+        FrontierManager frontierManager = new FrontierManager(frontier, backlinkFrontier, 2, 2, linkSelector, null, null, emptyLinkFilter, null);
         
         LinkRelevance link1 = new LinkRelevance(new URL("http://www.example1.com/index.html"), LinkRelevance.DEFAULT_TYPE, 1);
         LinkRelevance link2 = new LinkRelevance(new URL("http://www.example2.com/index.html"), LinkRelevance.DEFAULT_TYPE, 2);

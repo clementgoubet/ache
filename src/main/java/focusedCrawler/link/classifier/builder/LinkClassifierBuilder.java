@@ -55,11 +55,6 @@ public class LinkClassifierBuilder {
 	
 	private String modelPath;
 	
-	private int thresoldOfFameParents = 3;
-
-	private int thresoldOfFameChildren = 10;
-
-	
 	public LinkClassifierBuilder(BipartiteGraphRepository graphRep, StopList stoplist, LinkMetadataWrapper wrapper, Frontier linkFrontier, String modelPath){
 		this.graphRep = graphRep;
 		this.stemmer = new PorterStemmer();
@@ -211,27 +206,16 @@ public class LinkClassifierBuilder {
 			String strURL = (String) iterator.next();
 			URL normalizedURL = new URL(strURL);
 			boolean positive = false;
-			boolean notNegative = false;
 			LinkMetadata[] lms = graphRep.getBacklinksLM(normalizedURL);
 			if(lms == null){
 				continue;
 			}
 			for(LinkMetadata lm : lms){
 				String[] urls = graphRep.getChildren(lm.getUrl());
-				if(!(urls.length > thresoldOfFameChildren)){ // We want to remove very "famous" pages from the instances
-					for(String url : urls){
-						if(!url.equals(strURL) && relSites.contains(url)){
-							if(graphRep.getParents(url).length < thresoldOfFameParents){ // We want to remove very "famous" pages from the instances
-								positive = true;
-							}
-							else{
-								notNegative=true; // not using it as positive doesn't mean it is negative
-							}
-						}
+				for(String url : urls){
+					if(!url.equals(strURL) && relSites.contains(url)){
+						positive = true;
 					}
-				}
-				else{
-					notNegative=true; // not using it as positive doesn't mean it is negative
 				}
 			}
 			LinkMetadata lm = graphRep.getLM(normalizedURL);
@@ -239,10 +223,8 @@ public class LinkClassifierBuilder {
 				if(positive){
 					instances.get(0).add(lm);
 				}
-				else if(!notNegative){
-					if(instances.get(1).size() < instances.get(0).size()){
-						instances.get(1).add(lm);
-					}
+				else if(instances.get(1).size() < instances.get(0).size()){
+					instances.get(1).add(lm);
 				}
 			}
 		}
@@ -275,6 +257,8 @@ public class LinkClassifierBuilder {
 		instances.add(new ArrayList<LinkMetadata>());
 		instances.add(new ArrayList<LinkMetadata>());			
 		HashSet<String> visitedLinks = linkFrontier.visitedLinks();
+		
+//		System.out.println("TOTAL NUMBER BACKLINKS "+graphRep.getBacklinkLMs().length);
 //		System.out.println("VISTED LINKS");
 //		for(String s : visitedLinks){
 //			System.out.println(s);
@@ -289,19 +273,13 @@ public class LinkClassifierBuilder {
 			}
 			for(LinkMetadata lm : lms){
 				String[] urls = graphRep.getChildren(lm.getUrl());
-				if(!(urls.length > thresoldOfFameChildren)){ // We want to remove very "famous" pages from the instances
-					for(String url : urls){
-						if(!url.equals(strURL) && relSites.contains(url)){
-							if(graphRep.getParents(url).length < thresoldOfFameParents){ // We want to remove very "famous" pages from the instances
-								instances.get(0).add(lm);
-								System.out.println("\t"+strURL+" --> " +lm.getUrl() + " --> "+ url);
-							}
-						}
-						else{
-							if(instances.get(1).size() < instances.get(0).size()){
-								instances.get(1).add(lm);
-							}
-						}
+				for(String url : urls){
+					if(!url.equals(strURL) && relSites.contains(url)){
+						instances.get(0).add(lm);
+						System.out.println("\t"+strURL+" --> " +lm.getUrl() + " --> "+ url);
+					}
+					else if(instances.get(1).size() < instances.get(0).size()){
+						instances.get(1).add(lm);
 					}
 				}
 			}
@@ -310,7 +288,7 @@ public class LinkClassifierBuilder {
 		Classifier classifier;
 		try{
 			String weka = createWekaInput(instances,LinkRelevance.TYPE_BACKLINK_FORWARD);
-			System.out.println(weka);
+//			System.out.println(weka);
 			reader = new StringReader(weka);
 			classifier = loadClassifier(reader);
 		}catch(LinkClassifierException e){

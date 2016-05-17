@@ -174,7 +174,7 @@ public class OnlineLearning {
 					String url = URLDecoder.decode(files[j].getName(), "UTF-8");
 					if(!relSites.contains(url)){
 						relSites.add(url);
-						System.out.println(">>" + url);
+//						System.out.println(">>" + url);
 					}
 				}
 			}
@@ -369,14 +369,14 @@ public class OnlineLearning {
 		if(updateFrontier){
 			manager.setBacklinkForwardClassifier(backlinkClassifier);
 		}
-		LinkMetadata[] backLNs = rep.getBacklinkLMs();
-		for (int i = 0; i < backLNs.length; i++) {
-			if(backLNs[i] != null){
-				LinkRelevance lr = backlinkClassifier.classify(backLNs[i],LinkRelevance.TYPE_BACKLINK_FORWARD);
+		LinkMetadata[] backLMs = rep.getBacklinkLMs();
+		for (LinkMetadata backLM :backLMs) {
+			if(backLM != null){
+				LinkRelevance lr = backlinkClassifier.classify(backLM,LinkRelevance.TYPE_BACKLINK_FORWARD);
 				if(updateFrontier && lr != null && !usedLinks.contains(lr.getURL().toString())){
 					backlinkFrontier.update(lr);
 				}
-				String id = rep.getID(backLNs[i].getUrl());
+				String id = rep.getID(backLM.getUrl());
 				if(id != null && lr != null){
 					VSMElement elem = new VSMElement(id, (lr.getRelevance()-100)/100);
 					elems.put(id + "_hub",elem);

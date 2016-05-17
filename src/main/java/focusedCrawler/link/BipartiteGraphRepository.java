@@ -3,6 +3,7 @@ package focusedCrawler.link;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Vector;
 
@@ -254,7 +255,7 @@ public class BipartiteGraphRepository {
 			String[] linkIds = strLinks.split("###");
 			for (int i = 0; i < linkIds.length; i++) {
 				LinkMetadata lm = nodeID.get(linkIds[i]);
-				if(lm != null && lm.getIsPageInfoSearchEngineSet()){
+				if(lm != null && lm.getIsABacklink() && getId(lm.getUrlBacklinked()).equals(urlId)){
 					tempLMs.add(lm);
 				}
 			}
@@ -263,7 +264,6 @@ public class BipartiteGraphRepository {
 			return lms;
 		}
 	}
-	
 
 	/**
 	 * Insert outlinks from hubs 
@@ -281,6 +281,7 @@ public class BipartiteGraphRepository {
 			if(lms[i] != null){
 				String lnURL = lms[i].getUrl();
 				String id = getId(lnURL);
+				boolean skipEdge = false;
 				if(!currentLinks.contains(id)){
 					LinkMetadata lm = nodeID.get(id);
 					// Create if totally new
@@ -294,19 +295,26 @@ public class BipartiteGraphRepository {
 						lm.updateOutlinkMetadata(lms[i]);
 						nodeID.put(id, lm);
 					}
-					buffer.append(id);
-					buffer.append(separator);
-					currentLinks.add(id);
-				}
-				String strLinks = parentsGraph.get(id);
-				HashSet<String> tempCurrentLinks = parseRecordBacklink(strLinks);
-				if(!tempCurrentLinks.contains(urlId)){
-					if(tempCurrentLinks.size() == 0){
-						strLinks = urlId + separator;
-					}else{
-						strLinks = strLinks + urlId + separator;
+					else{
+						skipEdge =true;
 					}
-					parentsGraph.put(id, strLinks);
+					if(!skipEdge){
+						buffer.append(id);
+						buffer.append(separator);
+						currentLinks.add(id);
+					}
+				}
+				if(!skipEdge){
+					String strLinks = parentsGraph.get(id);
+					HashSet<String> tempCurrentLinks = parseRecordBacklink(strLinks);
+					if(!tempCurrentLinks.contains(urlId)){
+						if(tempCurrentLinks.size() == 0){
+							strLinks = urlId + separator;
+						}else{
+							strLinks = strLinks + urlId + separator;
+						}
+						parentsGraph.put(id, strLinks);
+					}
 				}
 			}
 		}
@@ -336,51 +344,55 @@ public class BipartiteGraphRepository {
 		StringBuffer buffer = new StringBuffer();
 		for (int i = 0; i < links.length; i++) {
 			String id = getId(links[i].getBacklinkUrls().elementAt(0));
-			if(!currentLinks.contains(id)){
-				LinkMetadata lm = nodeID.get(urlId);
-				// Create if totally new
-				if(lm == null){
-					LinkMetadata lm2 = new LinkMetadata(url.toString());
-					lm2.updateBacklinkMetadata(links[i]);
-					nodeID.put(urlId, lm2);
-				}
-				// Update if exists but "backlink page metadata" is empty
-				else {
-					lm.updateBacklinkMetadata(links[i]);
-					nodeID.put(urlId, lm);
-				}
-				buffer.append(id);
-				buffer.append(separator);
-				currentLinks.add(id);
-			}
+			LinkMetadata parentLm = nodeID.get(id);
 			
-			String strLinks = childrenGraph.get(id);
-			HashSet<String> tempCurrentLinks = parseRecordForwardLink(strLinks);
-			if(!tempCurrentLinks.contains(urlId)){
-				if(tempCurrentLinks.size() == 0){
-					strLinks = urlId + separator;
-				}else{
-					strLinks = strLinks + urlId + separator;
-				}
-				childrenGraph.put(id, strLinks);
-				
-				// Create if possible the linkMetadata of the "backlink page"
-				if(links[i].getBacklinkUrls().size() != 0 && links[i].getBacklinkSnippets().size() != 0 && links[i].getBacklinkTitles().size() != 0){
-					LinkMetadata newLm = new LinkMetadata(links[i].getBacklinkUrls().elementAt(0));
-					newLm.setSearchEngineSnippet(links[i].getBacklinkSnippets().elementAt(0));
-					newLm.setSearchEngineTitle(links[i].getBacklinkTitles().elementAt(0));
-					
-					LinkMetadata lm = nodeID.get(id);
+			if(parentLm==null || !parentLm.getIsABacklink()){ // no existing backlink already pointing to the parent
+				if(!currentLinks.contains(id)){
+					LinkMetadata lm = nodeID.get(urlId);
 					// Create if totally new
 					if(lm == null){
-						LinkMetadata lm2 = new LinkMetadata(newLm.getUrl());
-						lm2.updatePageSearchEngineMetadata(newLm);
-						nodeID.put(id, lm2);
+						LinkMetadata lm2 = new LinkMetadata(url.toString());
+						lm2.updateBacklinkMetadata(links[i]);
+						nodeID.put(urlId, lm2);
 					}
-					// Update if exists
-					else if(!lm.getIsPageInfoSearchEngineSet()){
-						lm.updatePageSearchEngineMetadata(newLm);
-						nodeID.put(id, lm);
+					else{
+						lm.updateBacklinkMetadata(links[i]);
+						nodeID.put(urlId, lm);
+					}
+					buffer.append(id);
+					buffer.append(separator);
+					currentLinks.add(id);
+				}
+				
+				String strLinks = childrenGraph.get(id);
+				HashSet<String> tempCurrentLinks = parseRecordForwardLink(strLinks);
+				if(!tempCurrentLinks.contains(urlId)){
+					if(tempCurrentLinks.size() == 0){
+						strLinks = urlId + separator;
+					}else{
+						strLinks = strLinks + urlId + separator;
+					}
+					childrenGraph.put(id, strLinks);
+					
+					// Create if possible the linkMetadata of the "backlink page"
+					if(links[i].getBacklinkUrls().size() != 0 && links[i].getBacklinkSnippets().size() != 0 && links[i].getBacklinkTitles().size() != 0){
+						LinkMetadata newLm = new LinkMetadata(links[i].getBacklinkUrls().elementAt(0));
+						newLm.setSearchEngineSnippet(links[i].getBacklinkSnippets().elementAt(0));
+						newLm.setSearchEngineTitle(links[i].getBacklinkTitles().elementAt(0));
+												
+						// Create if totally new
+						if(parentLm == null){
+							LinkMetadata lm2 = new LinkMetadata(newLm.getUrl());
+							lm2.updatePageSearchEngineMetadata(newLm);
+							lm2.updateOriginOfBacklink(url.toString());
+							nodeID.put(id, lm2);
+						}
+						// Update if exists
+						else if(!parentLm.getIsPageInfoSearchEngineSet()){
+							parentLm.updatePageSearchEngineMetadata(newLm);
+							parentLm.updateOriginOfBacklink(url.toString());
+							nodeID.put(id, parentLm);
+						}
 					}
 				}
 			}

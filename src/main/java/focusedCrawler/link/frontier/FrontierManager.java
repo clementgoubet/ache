@@ -59,6 +59,8 @@ public class FrontierManager {
     private final LinkSelector backlinkForwardSelector;
     
     private final LinkSelector backlinkBackwardSelector;
+    
+    private int[] weights = {100,1,2};
 
     public FrontierManager(Frontier linkFrontier,
     					   Frontier backlinkFrontier,
@@ -67,7 +69,8 @@ public class FrontierManager {
                            LinkSelector outlinkSelector,
                            LinkSelector backlinkForwardSelector,
                            LinkSelector backlinkBackwardSelector,
-                           LinkFilter linkFilter) {
+                           LinkFilter linkFilter,
+                           int[] weights) {
         this.outlinkSelector = outlinkSelector;
         this.backlinkBackwardSelector = backlinkBackwardSelector;
         this.backlinkForwardSelector = backlinkForwardSelector;
@@ -76,6 +79,8 @@ public class FrontierManager {
         this.backlinkFrontier = backlinkFrontier;
         this.linksToLoad = linksToLoad;
         this.linkFilter = linkFilter;
+        if(weights!=null)
+        	this.weights=weights;
         this.loadQueue(linksToLoad);
 
     }
@@ -95,9 +100,7 @@ public class FrontierManager {
     }
 
     private void loadQueue(int numberOfLinks) {
-
-    	// WEIGHTS SHOULD NOT BE HARDCODED
-    	int[] weights = {500,1,1};
+    	assert weights.length>=3 : "weights  array is not of the correct size";
     	int total = weights[0];
 		if(backlinkForwardSelector != null){
 			total+=weights[1];

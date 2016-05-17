@@ -66,7 +66,7 @@ public class FrontierManagerFactory {
 		return new FrontierManager(linkFrontier, backlinkFrontier,
 				config.getMaxSizeLinkQueue(), config.getMaxSizeLinkQueue(),
 				outlinkSelector, backlinkForwardSelector,
-				backlinkBackwardSelector, linkFilter);
+				backlinkBackwardSelector, linkFilter,config.getSelectionWeights());
 	}
 
 	private static LinkSelector createLinkSelector(LinkStorageConfig config,

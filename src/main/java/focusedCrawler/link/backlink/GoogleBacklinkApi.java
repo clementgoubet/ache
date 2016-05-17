@@ -2,9 +2,11 @@ package focusedCrawler.link.backlink;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -31,19 +33,25 @@ public class GoogleBacklinkApi implements BacklinkApi {
             Document doc = Jsoup.parse(connection.getInputStream(), "UTF-8", host);
             Elements searchItems = doc.select("div#search").select(".g");
             
-            int resultSize = searchItems.size();
-    
-            LinkMetadata[] backlinks = new LinkMetadata[resultSize];
-            int i = 0;
+            ArrayList<LinkMetadata> backlinksList = new ArrayList<>();
             for (Element item : searchItems) {
                 Elements linkUrl = item.select("a[href]");
                 Elements linkSnippet = item.select(".st");
-                backlinks[i] = new LinkMetadata();
-                backlinks[i].addBacklinkUrl(linkUrl.attr("href"));
-                backlinks[i].addBacklinkTitle(linkUrl.text());
-                backlinks[i].addBacklinkSnippet(linkSnippet.text());
-                i++;
+                LinkMetadata lm = new LinkMetadata();
+                try{
+                	//check that url is not malformed
+                	new URL(linkUrl.attr("href"));
+                	lm.addBacklinkUrl(linkUrl.attr("href"));
+                	lm.addBacklinkTitle(linkUrl.text());
+                	lm.addBacklinkSnippet(linkSnippet.text());
+                	backlinksList.add(lm);
+                } catch(MalformedURLException e){
+                	// skip malformed urls
+                }
             }
+            LinkMetadata[] backlinks = new LinkMetadata[backlinksList.size()];
+            backlinksList.toArray(backlinks);
+
             return backlinks;
         } catch (IOException e) {
             throw new IOException("Failed to download backlinks from Google.", e);

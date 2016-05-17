@@ -53,6 +53,13 @@ public class LinkMetadata {
 	@JsonProperty("backlink_urls")
 	private Vector<String> backlinkUrls = new Vector<String>();
 	
+	// 
+	@JsonProperty("is_a_backlink")
+	private boolean isABacklink;
+	
+	@JsonProperty("url_backlinked")
+	private String urlBacklinked;
+	
 	
 	// data concerning the outlinks on THIS page
 	@JsonProperty("is_target_of_outlink")
@@ -163,6 +170,14 @@ public class LinkMetadata {
 	
 	public void setSameSite(boolean sameSite){
 		this.sameSite = sameSite;
+	}
+	
+	public void setIsABacklink(boolean isABacklink){
+		this.isABacklink = isABacklink;
+	}
+	
+	public void setUrlBacklinked(String urlBacklinked){
+		this.urlBacklinked = urlBacklinked;
 	}
 
 	
@@ -296,6 +311,15 @@ public class LinkMetadata {
 		return backlinkSnippets;
 	}
 	
+	public boolean getIsABacklink(){
+		return isABacklink;
+	}
+	
+	public String getUrlBacklinked(){
+		return urlBacklinked;
+	}
+	
+	
 	public String[] getSearchEngineTitleAsArray(){
 		// TITLE TOKENISING MUST BE DONE SOMEWHERE
 		if(searchEngineTitle != null){
@@ -347,6 +371,8 @@ public class LinkMetadata {
 		lm.setIsPageInfoSet(isPageInfoSet);
 		lm.setBacklinkSnippets(backlinkSnippets);
 		lm.setBacklinkTitles(backlinkTitles);
+		lm.setIsABacklink(isABacklink);
+		lm.setUrlBacklinked(urlBacklinked);
 		return lm;
 	}
 	
@@ -392,6 +418,9 @@ public class LinkMetadata {
 		result += "\tisPageInfoSearchEngineSet: "+isPageInfoSearchEngineSet+"\n";
 		result += "\tsearchEngineTitle: "+searchEngineTitle+"\n";
 		result += "\tsearchEngineSnippet: "+searchEngineSnippet+"\n";
+		result += "\tisABacklink: "+isABacklink+"\n";
+		result += "\turlBacklinked: "+urlBacklinked+"\n";
+		
 		return result;
 	}
 	
@@ -451,6 +480,12 @@ public class LinkMetadata {
 		this.setSearchEngineSnippet(externalLM.searchEngineSnippet);
 		
 		this.setIsPageInfoSearchEngineSet(true);
+	}
+	
+	public void updateOriginOfBacklink(String urlBacklinked){
+		this.setUrlBacklinked(urlBacklinked);
+		
+		this.setIsABacklink(true);
 	}
 	
 	

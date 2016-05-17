@@ -116,6 +116,10 @@ public class LinkStorageConfig {
     @JsonProperty("link_storage.link_selector.backlinks.forward")
     private String backlinkForwardSelector = "TopkLinkSelector";
     
+    @JsonProperty("link_storage.link_selector.weights")
+    private int[] selectionWeights = {50,1,2};
+    
+    
     // TODO Remove target storage folder dependency from link storage
     private String targetStorageDirectory = "data_target/";
     
@@ -217,6 +221,10 @@ public class LinkStorageConfig {
 
     public StorageConfig getStorageServerConfig() {
         return serverConfig;
+    }
+    
+    public int[] getSelectionWeights(){
+    	return selectionWeights;
     }
 
 }

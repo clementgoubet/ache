@@ -42,7 +42,9 @@ public class FilterData {
 	}
 
 	public ArrayList<WordFrequency> filter(ArrayList<WordFrequency> sortList, ArrayList<WordFrequency> aroundWords){
-
+		if(sortList.isEmpty()){
+			return new ArrayList<WordFrequency>();
+		}
 		//System.out.println("SIZE OF sortList" + sortList.size());
 		boolean stem = aroundWords != null;
 		ArrayList<WordFrequency> filteredWords = new ArrayList<>();
