@@ -134,6 +134,12 @@ public class LinkStorage extends StorageDefault {
 
 			LinkMetadata[] lms = page.getPageURL().getLinkMetadatas();
 			graphManager.getRepository().insertOutlinks(page.getURL(), lms);
+			
+			// update the yield of pages that led to this one
+			// WARNING: Threshold should not be hardcoded (is present in the config) but not a problem for binary page classifier
+			if(page.getRelevance()>0.5){
+				graphManager.getRepository().updateYield(lm.getUrl());
+			}
 
 			graphManager.getRepository().commit();
 

@@ -28,6 +28,9 @@ public class LinkMetadata {
 	@JsonProperty("page_relevance")
 	private int pageRelevance;
 	
+	@JsonProperty("page_yield")
+	private int yield;
+	
 	
 	// data describing the page itself BUT obtained through a Search Engine results
 	@JsonProperty("is_page_info_search_engine_set")
@@ -179,6 +182,10 @@ public class LinkMetadata {
 	public void setUrlBacklinked(String urlBacklinked){
 		this.urlBacklinked = urlBacklinked;
 	}
+	
+	public void setYield(int yield){
+		this.yield=yield;
+	}
 
 	
 	
@@ -319,6 +326,10 @@ public class LinkMetadata {
 		return urlBacklinked;
 	}
 	
+	public int getYield(){
+		return yield;
+	}
+	
 	
 	public String[] getSearchEngineTitleAsArray(){
 		// TITLE TOKENISING MUST BE DONE SOMEWHERE
@@ -373,6 +384,7 @@ public class LinkMetadata {
 		lm.setBacklinkTitles(backlinkTitles);
 		lm.setIsABacklink(isABacklink);
 		lm.setUrlBacklinked(urlBacklinked);
+		lm.setYield(yield);
 		return lm;
 	}
 	
@@ -388,6 +400,7 @@ public class LinkMetadata {
 			}
 		}
 		result += "\n\tpageRelevance: "+pageRelevance+"\n";
+		result += "\tyield: "+yield+"\n";
 		result += "\tisTargetOfBacklink: "+isTargetOfBacklink+"\n";
 		result += "\tbacklinkUrls: ";
 		for(int i=0; i<backlinkUrls.size();i++){
@@ -448,6 +461,15 @@ public class LinkMetadata {
 		this.backlinkUrls.add(backlinkUrl);
 	}
 	
+	public void increaseYield(){
+		yield+=1;
+	}
+	
+	public void decreaseYield(){
+		if(yield > 0)
+			yield-=1;
+	}
+	
 	public void updateOutlinkMetadata(LinkMetadata externalLM){
 		this.setAnchor(externalLM.anchor);
 		this.setAround(externalLM.around);
@@ -471,6 +493,7 @@ public class LinkMetadata {
 	public void updatePageMetadata(LinkMetadata externalLM){
 		this.setPageContent(externalLM.pageContent);
 		this.setPageRelevance(externalLM.pageRelevance);
+		this.setYield(0);
 		
 		this.setIsPageInfoSet(true);
 	}
@@ -487,6 +510,7 @@ public class LinkMetadata {
 		
 		this.setIsABacklink(true);
 	}
+	
 	
 	
 	

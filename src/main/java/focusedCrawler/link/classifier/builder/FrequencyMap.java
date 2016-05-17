@@ -68,7 +68,11 @@ public class FrequencyMap {
 	
 	public ArrayList<WordFrequency> filter(ArrayList<WordFrequency> aroundWords){
 		ArrayList<WordFrequency> list = new ArrayList<>(frequencyMap.values());
+		int size = list.size();
 		Collections.sort(list,new WordFrequencyComparator());
+		if(list.size() != size){
+			System.out.println("SORTED LIST IS SHORTER...");
+		}
 		ArrayList<WordFrequency> fieldFinal = filterData.filter(list,aroundWords);
 		fieldWords = new String[fieldFinal.size()];
 		for (int i = 0; i < fieldFinal.size(); i++) {

@@ -236,6 +236,19 @@ public class BipartiteGraphRepository {
 	}
 	
 	
+	public void updateYield(String url){
+		String linksIds = parentsGraph.get(getId(url));
+		if(linksIds != null){
+			String[] linkIds = linksIds.split("###");
+			for(String id : linkIds){
+				LinkMetadata lm = nodeID.get(id);
+				lm.increaseYield();
+				nodeID.put(id,lm);
+			}
+		}
+	}
+	
+	
 	/**
 	 * This method returns the LMs of the urls targeted by backlinks of this url.
 	 * @param url
